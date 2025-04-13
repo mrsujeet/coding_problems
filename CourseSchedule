@@ -95,6 +95,7 @@ dfs(1) →	onPath[1] = true
 → dfs(3) →	onPath[3] = true
 →→ dfs(2) →	onPath[2] = true
 →→→ dfs(1) ❗	onPath[1] = true again 🔁 ❗ → Cycle!
+https://sujeet-web.blogspot.com/search?q=postorder
 */
 
  public boolean canFinish(int numCourses, int[][] prerequisites) {
