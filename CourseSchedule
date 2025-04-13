@@ -1,0 +1,150 @@
+/*
+There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai.
+
+For example, the pair [0, 1], indicates that to take course 0 you have to first take course 1.
+Return true if you can finish all courses. Otherwise, return false.
+
+ 
+
+Example 1:
+
+Input: numCourses = 2, prerequisites = [[1,0]]
+Output: true
+Explanation: There are a total of 2 courses to take. 
+To take course 1 you should have finished course 0. So it is possible.
+Example 2:
+
+Input: numCourses = 2, prerequisites = [[1,0],[0,1]]
+Output: false
+Explanation: There are a total of 2 courses to take. 
+To take course 1 you should have finished course 0, and to take course 0 you should also have finished course 1. So it is impossible.
+ 
+
+Constraints:
+
+1 <= numCourses <= 2000
+0 <= prerequisites.length <= 5000
+prerequisites[i].length == 2
+0 <= ai, bi < numCourses
+All the pairs prerequisites[i] are unique.
+
+visited[]	Node has been fully processed
+onPath[]	Node is in current DFS path (recursion stack)
+Used for	Detecting cycles
+
+We build a graph from prerequisites.
+
+We use DFS with two markers:
+
+onPath[] to detect back edges (cycles)
+
+visited[] to skip redundant work
+
+If we detect a cycle during DFS → return false.
+
+
+int[][] prerequisites = {{1, 0}, {2, 1}, {3, 2}};
+
+Course 3 depends on 2
+
+Course 2 depends on 1
+
+Course 1 depends on 0
+
+This is acyclic →
+
+dfs(3):
+  onPath[3] = true
+  → dfs(2)
+     onPath[2] = true
+     → dfs(1)
+        onPath[1] = true
+        → dfs(0)
+           onPath[0] = true
+           → graph.get(0) = [] → no prereqs
+           onPath[0] = false; visited[0] = true
+        ← return true
+     onPath[1] = false; visited[1] = true
+  onPath[2] = false; visited[2] = true
+onPath[3] = false; visited[3] = true
+Final result: ✅ No cycles → return true
+
+
+Example Input (With a Cycle):
+
+numCourses = 4;
+prerequisites = {
+    {1, 0},
+    {2, 1},
+    {3, 2},
+    {1, 3} // ← Cycle here
+};
+
+This creates a cycle: 1 → 2 → 3 → 1
+
+dfs(1) calls dfs(3)
+  dfs(3) calls dfs(2)
+    dfs(2) calls dfs(1)
+      ❗ Cycle detected at dfs(1)
+    ← dfs(2) returns false
+  ← dfs(3) returns false
+← dfs(1) returns false
+
+Call Stack	onPath[] (true means active in recursion)
+dfs(1) →	onPath[1] = true
+→ dfs(3) →	onPath[3] = true
+→→ dfs(2) →	onPath[2] = true
+→→→ dfs(1) ❗	onPath[1] = true again 🔁 ❗ → Cycle!
+*/
+
+ public boolean canFinish(int numCourses, int[][] prerequisites) {
+        // create adjacencylist graph to establish relation between given course and its dependencylist
+
+        Map<Integer, List<Integer>> adj=new HashMap<>();
+        for(int [] course: prerequisites){
+            if(adj.containsKey(course[1])){
+                List list=adj.get(course[1]);
+                list.add(course[0]);
+            }else{
+                List<Integer> list=new ArrayList<>();
+                list.add(course[0]);
+                adj.put(course[1],list);
+            }
+        }
+
+        boolean[] visited=new boolean[numCourses];
+        boolean[] onPath=new boolean[numCourses];
+        //course are starting from 0...to n-1
+        for(int course=0; course<numCourses; course++){
+            if(isCycle(visited,onPath,adj,course)){
+                return false;
+            }
+        }        
+        return true;
+    }
+
+    boolean isCycle(boolean[] visited, boolean[] onPath, Map <Integer, List<Integer>> adj, int course){
+        //base conditions
+        //on a given recursion path, if the course is already previously appeared then there is cycle
+        if(onPath[course]) return true;
+        //if the post order dfs (isCycle()), for the course is already completed then skip ie there was no cycle found
+        if(visited[course]) return false;
+
+           //no following courses, no loop
+        if(!adj.containsKey(course)) return false;
+        
+        onPath[course]=true;  // marking true for a given recursion path
+
+     
+
+        for(Integer childCourse:adj.get(course)){
+            if(isCycle(visited,onPath,adj,childCourse)){
+                return true;
+            }
+
+        }
+        visited[course]=true; //marking the course visted
+        onPath[course]=false; //on recursion return path, marking it false, for other recursion path
+        return false;
+        
+    }
