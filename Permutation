@@ -1,0 +1,60 @@
+/*
+call#   stack (top → bottom)            nums in that frame     comment
+─────   ─────────────────────────────   ────────────────────   ───────────────────────────────
+1       dfs(perms, [1,2,3], 0)          [1,2,3]               start at root, index = 0
+2       └─ dfs(..., 1)                  [1,2,3]               swap(0,0) ⇒ no‑op
+3          └─ dfs(..., 2)               [1,2,3]               swap(1,1) ⇒ no‑op
+4             └─ dfs(..., 3)            [1,2,3]               index==3 → add [1,2,3]
+               return ― back‑track
+            swap(1,1) restore           [1,2,3]
+            ├─ swap(2,1)                [1,3,2]
+5          └─ dfs(..., 2)               [1,3,2]
+6             └─ dfs(..., 3)            [1,3,2]               add [1,3,2]
+               return ― back‑track
+            swap(2,1) restore           [1,2,3]
+         return ― back‑track
+      swap(0,0) restore                 [1,2,3]
+      ├─ swap(1,0)                      [2,1,3]
+7    dfs(..., 1)                        [2,1,3]
+      ├─ swap(1,1)                      (no‑op)
+8       └─ dfs(..., 2)                  [2,1,3]
+9          └─ dfs(..., 3)               [2,1,3]               add [2,1,3]
+      ├─ swap(2,1)                      [2,3,1]
+10      └─ dfs(..., 2)                  [2,3,1]
+11         └─ dfs(..., 3)               [2,3,1]               add [2,3,1]
+   back‑track … etc.
+Keep following that pattern until every element has served once as the element fixed at each index level. The six leaves correspond to 3! = 6 permutations
+
+https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4mf-_AkwkQjCVAlcb__ixqdkh53PbnlaFbAiHWWAjuxRzSfB3RuX-4Dngv6NC9UNQob8fm8ixsPxHwDNXI6vP7V197Gc-uIROgoWxyCvXuGzYEO2pPqtgisBLm5NjzF-Xnt11ZDSc-NSWKw6rn1Bbjgp0xAwjxwq5UvE94Ioo8HQd5WitOtp8Dh0fTyQ/s2398/permutation.png
+
+*/
+ public List<List<Integer>> permute(int[] nums) {
+        List<List<Integer>> permutations =new LinkedList<>();
+        dfs(permutations,nums,0);
+        return permutations;
+    }
+
+    private void dfs(List<List<Integer>> permutations, int[] nums, int idx){
+
+        if(idx==nums.length){
+           List<Integer> ls =new LinkedList<>();
+           for(int num:nums){
+                ls.add(num);
+           }
+           permutations.add(ls);
+        }else{
+            Set<Integer> set=new HashSet<>();
+            for(int i=idx; i<nums.length; i++){
+                swap(i,idx,nums);
+                dfs(permutations,nums,idx+1);
+                swap(i,idx,nums);
+            }
+        }
+
+    }
+
+    private void swap(int i, int j, int[] arr){
+        int temp=arr[i];
+        arr[i]=arr[j];
+        arr[j]=temp;
+        }
