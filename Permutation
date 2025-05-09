@@ -25,7 +25,8 @@ call#   stack (top → bottom)            nums in that frame     comment
    back‑track … etc.
 Keep following that pattern until every element has served once as the element fixed at each index level. The six leaves correspond to 3! = 6 permutations
 
-https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4mf-_AkwkQjCVAlcb__ixqdkh53PbnlaFbAiHWWAjuxRzSfB3RuX-4Dngv6NC9UNQob8fm8ixsPxHwDNXI6vP7V197Gc-uIROgoWxyCvXuGzYEO2pPqtgisBLm5NjzF-Xnt11ZDSc-NSWKw6rn1Bbjgp0xAwjxwq5UvE94Ioo8HQd5WitOtp8Dh0fTyQ/s2398/permutation.png
+
+https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhzHJuV7rpHEHhXyr6l0ctDAv78PyzvU6eamTRcLuW_DTlMGd2sRKj5oIN89BF8ebPNrw46vnb4OLvae951S13fP5bk15iKinOvBrSF2irPwTfgvgUNXsFjttQ7f5by436y3Ghbue9v5AwBWEccagpKfwv7AAPqfgdKpO8xlIfmJOSrFRDPaKa2UggVVf4/s2985/output.png
 
 */
  public List<List<Integer>> permute(int[] nums) {
