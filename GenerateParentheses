@@ -1,0 +1,60 @@
+/*
+https://sujeet-web.blogspot.com/2025/05/generate-parentheses.html
+
+Given n pairs of parentheses, write a function to generate all combinations of well-formed parentheses.
+
+
+Example 1:
+
+Input: n = 3
+Output: ["((()))","(()())","(())()","()(())","()()()"]
+Example 2:
+
+Input: n = 1
+Output: ["()"]
+ 
+
+Constraints:
+
+1 <= n <= 8
+
+
+Algorithm Logic:
+
+At each step, we can either add an opening ( or closing ) parenthesis
+We can add ( if we haven't used all n opening parentheses
+We can add ) only if it doesn't make the string invalid (i.e., close < open)
+When the string length reaches 2*n, we have a complete valid combination
+
+Time Complexity: O(4^n / √n) - This is the nth Catalan number
+Space Complexity: O(4^n / √n) for storing results + O(n) for recursion depth
+
+*/
+
+
+
+public List<String> generateParenthesis(int n) {
+        List<String> result=new ArrayList<>();
+        backtracking(result,"",0,0,n);
+
+        return result;
+        
+    }
+
+    private void backtracking(List<String> result,String current, int open, int close,int max){
+
+        //base condition: if current string length=2n ie all pair of parenthesis are considered
+        if(current.length()==2*max){
+            result.add(current);
+            return;
+        }
+
+        if(open<max){
+             backtracking(result,current+'(',open+1,close,max);
+        }
+
+        if(close<open){
+             backtracking(result,current+')',open,close+1,max);
+        }
+
+    }
