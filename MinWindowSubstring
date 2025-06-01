@@ -1,0 +1,105 @@
+/*
+https://leetcode.com/problems/minimum-window-substring/editorial/?envType=study-plan-v2&envId=top-100-liked
+Given two strings s and t of lengths m and n respectively, return the minimum window substring of s such that every character in t (including duplicates) is included in the window. If there is no such substring, return the empty string "".
+
+The testcases will be generated such that the answer is unique.
+
+ 
+
+Example 1:
+
+Input: s = "ADOBECODEBANC", t = "ABC"
+Output: "BANC"
+Explanation: The minimum window substring "BANC" includes 'A', 'B', and 'C' from string t.
+Example 2:
+
+Input: s = "a", t = "a"
+Output: "a"
+Explanation: The entire string s is the minimum window.
+Example 3:
+
+Input: s = "a", t = "aa"
+Output: ""
+Explanation: Both 'a's from t must be included in the window.
+Since the largest window of s only has one 'a', return empty string.
+ 
+
+Constraints:
+
+m == s.length
+n == t.length
+1 <= m, n <= 105
+s and t consist of uppercase and lowercase English letters.
+ 
+
+Follow up: Could you find an algorithm that runs in O(m + n) time?
+
+
+Let’s walk through:
+str = "ADOBECODEBANC"
+pattern = "ABC"
+
+Left	Right	Window	Match?	patternMatch	Action
+0	0	A	✅ A	1	Expand
+0	1	AD		1	Expand
+0	2	ADO		1	Expand
+0	3	ADOB	✅ B	2	Expand
+0	4	AOBE		2	Expand
+0	5	ADOBEC	✅ C	3	✅ All matched (start shrinking)
+0→1	5	DOBEC		still valid	Try shrinking
+1→2	5	OBEC		still valid	Try shrinking
+2→3	5	BEC		still valid	Try shrinking
+3→4	5	EC	❌ lost B	2	Stop shrinking
+minWindow = BEC			
+
+
+*/
+
+
+public String minWindow(String str, String pattern){
+        String minWindowStr="";
+        int minWindowStrLen=Integer.MAX_VALUE;
+        int    left=0;
+        int    windowStart=0;
+        Map<Character,Integer> patternMap = new HashMap<>();
+        int patternMatch=0;
+        for(int i=0; i<pattern.length(); i++){
+            char c=pattern.charAt(i);
+            patternMap.put(c,patternMap.getOrDefault(c,0)+1);
+
+        }   
+
+        for(int right=0; right<str.length(); right++){
+            char c=str.charAt(right);
+
+            if(patternMap.containsKey(c)){
+                if(patternMap.get(c)>0){
+                    patternMatch++;         
+                }
+                patternMap.put(c,patternMap.getOrDefault(c,0)-1);
+            }
+
+           while(patternMatch==pattern.length()){ // once all pattern chars are covered in a current window, start working on squeezing
+
+                if(right-left+1<minWindowStrLen){
+                    minWindowStrLen=right-left+1;
+                    windowStart=left;
+                }
+                char cleft=str.charAt(left);
+                if(patternMap.containsKey(cleft)){
+                    patternMap.put(cleft,patternMap.getOrDefault(cleft,0)+1);
+                    if(patternMap.get(cleft)>0){ 
+                        patternMatch--;
+                       
+                    }
+                     
+                }
+                left++;
+           } 
+
+
+        }
+
+      return  minWindowStrLen>str.length()?"":str.substring(windowStart,windowStart+minWindowStrLen);
+
+     }
