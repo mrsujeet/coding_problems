@@ -1,0 +1,97 @@
+/*
+https://leetcode.com/problems/trapping-rain-water/description/?envType=study-plan-v2&envId=top-100-liked
+
+Given n non-negative integers representing an elevation map where the width of each bar is 1, compute how much water it can trap after raining.
+
+ 
+
+Example 1:
+
+
+Input: height = [0,1,0,2,1,0,1,3,2,1,2,1]
+Output: 6
+Explanation: The above elevation map (black section) is represented by array [0,1,0,2,1,0,1,3,2,1,2,1]. In this case, 6 units of rain water (blue section) are being trapped.
+Example 2:
+
+Input: height = [4,2,0,3,2,5]
+Output: 9
+ 
+
+Constraints:
+
+n == height.length
+1 <= n <= 2 * 104
+0 <= height[i] <= 105
+
+
+1. The Goal: Trapping Rain Water
+Imagine the numbers in the array A represent the heights of a series of vertical bars. The goal is to calculate how much water can be trapped in the gaps between these bars after it rains.
+
+The amount of water that can be held above any single bar is determined by the height of the walls around it. Specifically, the water level can only rise to the height of the shorter of the two tallest walls to its left and right.
+
+Formula for water at any position i:
+water_at_i = min(tallest_wall_to_the_left, tallest_wall_to_the_right) - height_of_bar_i
+
+A naive solution would be to iterate through each bar, then for each bar, scan its left and right sides to find the tallest walls. This is inefficient. The two-pointer algorithm is much smarter.
+
+2. The Algorithm: The Two-Pointer Approach
+This algorithm uses two pointers, left and right, starting at the opposite ends of the array. It also maintains two variables, lMax (the tallest bar seen so far from the left) and rMax (the tallest bar seen so far from the right).
+
+The core idea is to move the pointers inward, processing one bar at a time, and adding the trapped water to a running total maxA.
+
+3. The Key Insight: The Water Level Guarantee
+The most brilliant part of this algorithm is the condition if(lMax < rMax). This is how the algorithm cleverly determines the water level at a given position without needing to scan the rest of the array.
+
+Here's the logic:
+
+If lMax < rMax:
+
+This tells us that the left wall (lMax) is the bottleneck.
+We are currently processing the bar at the left pointer (A[left]).
+We know for a fact that the tallest wall to its left is lMax.
+We also know that there is at least one wall to its right that is taller than lMax (since rMax is taller).
+Therefore, the water level above A[left] is guaranteed to be determined by lMax. We don't need to know the true tallest_wall_to_the_right, because it's irrelevant; the water is limited by the shorter lMax.
+So, we can confidently calculate the trapped water at this position and move the left pointer inward.
+If rMax <= lMax:
+
+The logic is perfectly symmetrical. The right wall (rMax) is now the bottleneck.
+We are processing the bar at the right pointer (A[right]).
+The water level above A[right] is guaranteed to be determined by rMax.
+We calculate the trapped water and move the right pointer inward.
+
+*/
+
+
+
+public int trap(int[] A) {
+    int left = 0;                     // Pointer starts at the first bar
+    int right = A.length - 1;         // Pointer starts at the last bar
+    int lMax = 0;                     // Tallest wall found so far from the left
+    int rMax = 0;                     // Tallest wall found so far from the right
+    int maxA = 0;                     // Total accumulated water (the answer)
+
+    // Loop until the pointers meet
+    while (left < right) {
+        // Update the max heights seen so far from both ends
+        lMax = Math.max(lMax, A[left]);
+        rMax = Math.max(rMax, A[right]);
+
+        // The core logic: which wall is the bottleneck?
+        if (lMax < rMax) {
+            // The left wall is the bottleneck.
+            // Water at A[left] = (height of water level) - (height of current bar)
+            // Water at A[left] = lMax - A[left]
+            maxA += lMax - A[left];
+            // We've processed this bar, so move to the next one.
+            left++;
+        } else {
+            // The right wall is the bottleneck.
+            // Water at A[right] = rMax - A[right]
+            maxA += rMax - A[right];
+            // We've processed this bar, so move to the next one.
+            right--;
+        }
+    }
+
+    return maxA;
+}
