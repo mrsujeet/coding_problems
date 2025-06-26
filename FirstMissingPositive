@@ -1,0 +1,96 @@
+/*
+https://leetcode.com/problems/first-missing-positive/description/?envType=study-plan-v2&envId=top-100-liked
+
+Given an unsorted integer array nums. Return the smallest positive integer that is not present in nums.
+
+You must implement an algorithm that runs in O(n) time and uses O(1) auxiliary space.
+
+ 
+
+Example 1:
+
+Input: nums = [1,2,0]
+Output: 3
+Explanation: The numbers in the range [1,2] are all in the array.
+Example 2:
+
+Input: nums = [3,4,-1,1]
+Output: 2
+Explanation: 1 is in the array but 2 is missing.
+Example 3:
+
+Input: nums = [7,8,9,11,12]
+Output: 1
+Explanation: The smallest positive integer 1 is missing.
+ 
+
+Constraints:
+
+1 <= nums.length <= 105
+-231 <= nums[i] <= 231 - 1
+
+*/
+
+class Solution {
+    /**
+     * Finds the smallest positive integer that is not present in the given array.
+     * The algorithm runs in O(n) time and uses O(1) auxiliary space by
+     * modifying the input array in-place.
+     *
+     * @param nums The input unsorted integer array.
+     * @return The smallest positive integer not present in nums.
+     */
+    public int firstMissingPositive(int[] nums) {
+        int n = nums.length;
+
+        // Step 1: Cyclic Sort / In-place Hashing
+        // The goal is to place each positive number 'x' at index 'x-1'
+        // For example, if nums contains '3', we try to put it at index '2'.
+        int i = 0;
+        while (i < n) {
+            // Calculate the correct position for the current number nums[i]
+            // If nums[i] is 'x', its correct place should be at index 'x-1'.
+            int correctPos = nums[i] - 1;
+
+            // Check three conditions before attempting a swap:
+            // 1. nums[i] must be a positive number. (We are only interested in positive integers).
+            // 2. nums[i] must be within the valid range of indices [1, n].
+            //    If it's outside this range, it cannot be placed in a valid index.
+            // 3. nums[i] is not already in its correct position.
+            //    This prevents infinite loops if nums[i] is already where it should be,
+            //    or if nums[i] is a duplicate of a number already at its correct spot.
+
+            if (nums[i] > 0 && nums[i] <= n && nums[i] != nums[correctPos]) {
+                // Perform the swap: put nums[i] into its correct position
+                // and bring the element from the correct position to the current 'i'.
+                // The element brought to 'i' will be checked in the next iteration of the while loop.
+                int temp = nums[i];
+                nums[i] = nums[correctPos];
+                nums[correctPos] = temp;
+            } else {
+                // If any of the conditions are not met, it means:
+                // - nums[i] is not positive (e.g., 0 or negative)
+                // - nums[i] is too large (> n) to fit into an index
+                // - nums[i] is already in its correct position
+                // In these cases, we simply move to the next element.
+                i++;
+            }
+        }
+
+        // Step 2: Find the first missing positive integer. After the cyclic sort, iterate through the array.
+        // The first index 'i' where nums[i] is not equal to 'i + 1'
+        // indicates that 'i + 1' is the smallest missing positive integer.
+        for (i = 0; i < n; i++) {
+            if (nums[i] != i + 1) {
+                // If nums[i] is not what we expect (i.e., i+1),
+                // then (i+1) is the smallest positive integer that is missing.
+                return i + 1;
+            }
+        }
+
+        // Step 3: If all numbers from 1 to n are present
+        // If the loop completes, it means all numbers from 1 to n are present in the array.
+        // In this scenario, the smallest missing positive integer is 'n + 1'.
+        return n + 1;
+    }
+}
