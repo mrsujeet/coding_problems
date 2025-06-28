@@ -1,0 +1,163 @@
+/*
+https://leetcode.com/problems/n-queens/description/?envType=study-plan-v2&envId=top-100-liked
+
+
+The n-queens puzzle is the problem of placing n queens on an n x n chessboard such that no two queens attack each other.
+
+Given an integer n, return all distinct solutions to the n-queens puzzle. You may return the answer in any order.
+
+Each solution contains a distinct board configuration of the n-queens' placement, where 'Q' and '.' both indicate a queen and an empty space, respectively.
+
+*/
+
+import java.util.*;
+
+public class Solution {
+    public List<List<String>> solveNQueens(int n) {
+        List<List<String>> result = new ArrayList<>();
+        char[][] board = new char[n][n];
+
+        // Initialize board with '.'
+        for (int i = 0; i < n; i++) {
+            Arrays.fill(board[i], '.');
+        }
+
+        backtrack(0, board, result, n);
+        return result;
+    }
+
+    private void backtrack(int row, char[][] board, List<List<String>> result, int n) {
+        if (row == n) {
+            result.add(construct(board));
+            return;
+        }
+
+        for (int col = 0; col < n; col++) {
+            if (isSafe(board, row, col, n)) {
+                board[row][col] = 'Q';
+                backtrack(row + 1, board, result, n);
+                board[row][col] = '.'; // backtrack
+            }
+        }
+    }
+
+    private boolean isSafe(char[][] board, int row, int col, int n) {
+        // Check column
+        for (int i = 0; i < row; i++)
+            if (board[i][col] == 'Q') return false;
+
+        // Check diagonal (\)
+        for (int i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--)
+            if (board[i][j] == 'Q') return false;
+
+        // Check anti-diagonal (/)
+        for (int i = row - 1, j = col + 1; i >= 0 && j < n; i--, j++)
+            if (board[i][j] == 'Q') return false;
+
+        return true;
+    }
+
+    private List<String> construct(char[][] board) {
+        List<String> res = new ArrayList<>();
+        for (char[] row : board) {
+            res.add(new String(row));
+        }
+        return res;
+    }
+
+    public static void main(String[] args) {
+        Solution sol = new Solution();
+        int n = 4;
+        List<List<String>> solutions = sol.solveNQueens(n);
+
+        for (List<String> board : solutions) {
+            for (String row : board) {
+                System.out.println(row);
+            }
+            System.out.println();
+        }
+    }
+}
+2️⃣ Visualization (Step-by-Step)
+Visualize n = 4:
+
+Board:
+markdown
+Copy
+Edit
+0 1 2 3
+---------
+. . . .  0
+. . . .  1
+. . . .  2
+. . . .  3
+Step 1:
+Place Q in (0,0)
+
+css
+Copy
+Edit
+Q . . . 
+. . . . 
+. . . . 
+. . . . 
+Check next row.
+
+Step 2:
+Row 1:
+
+(1,0) ❌ same column
+
+(1,1) ❌ same diagonal
+
+(1,2) ✅
+
+css
+Copy
+Edit
+Q . . .
+. . Q .
+. . . .
+. . . .
+Check next row.
+
+Step 3:
+Row 2:
+
+(2,0) ❌ diagonal conflict
+
+(2,1) ❌ column conflict
+
+(2,2) ❌ column conflict
+
+(2,3) ✅
+
+css
+Copy
+Edit
+Q . . .
+. . Q .
+. . . Q
+. . . .
+Check next row.
+
+Step 4:
+Row 3:
+
+(3,0) ❌ diagonal
+
+(3,1) ❌ diagonal
+
+(3,2) ❌ column
+
+(3,3) ❌ column
+
+No position possible, backtrack.
+
+The algorithm will remove the last Q and try the next position in Row 2, then Row 1, systematically exploring all configurations.
+
+When Row == n, it saves the current configuration.
+
+3️⃣ Complexity Analysis
+✅ Time Complexity: ~O(N!) (backtracking but pruned)
+✅ Space Complexity: O(N^2) for board + recursion stack
