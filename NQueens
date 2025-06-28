@@ -78,6 +78,38 @@ public class Solution {
         }
     }
 }
+
+
+Why does the N-Queens backtracking algorithm only check the upper diagonals and upper columns?
+✅ Core Reason:
+You are placing queens row by row from top to bottom (row 0 to n-1).
+At any point when you are at row = r, you have only placed queens in rows 0 to r-1.
+
+Thus:
+
+Any conflicts can only come from queens placed in previous rows (above).
+
+No queens are placed below the current row yet.
+
+What do you need to check?
+1️⃣ Same Column
+Check if any queen in rows 0..r-1 is in the same column (col).
+
+Check upwards only.
+
+2️⃣ Diagonal (\)
+Check upper-left diagonal:
+
+Move up (row--) and left (col--).
+
+3️⃣ Anti-Diagonal (/)
+Check upper-right diagonal:
+
+Move up (row--) and right (col++).
+
+Why not check lower diagonals or lower rows?
+✅ Because no queens are placed below yet, so there cannot be a conflict from below.
+
 2️⃣ Visualization (Step-by-Step)
 Visualize n = 4:
 
