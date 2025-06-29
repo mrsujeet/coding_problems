@@ -80,6 +80,51 @@ public class Solution {
 }
 
 
+Why is row not checked in N-Queens?
+✅ You do NOT need to check the row because:
+
+In your backtracking algorithm, you place exactly one queen per row during recursion:
+
+java
+Copy
+Edit
+for (int col = 0; col < n; col++) {
+    if (isValid(...)) {
+        board[row][col] = 'Q';
+        backtracking(board, res, row + 1, n);
+        board[row][col] = '.';
+    }
+}
+✅ What this guarantees:
+
+At row = 0, you place 1 queen.
+
+At row = 1, you place 1 queen.
+
+...
+
+At row = n - 1, you place 1 queen.
+
+Thus:
+
+Each row will have exactly one queen.
+
+There can never be two queens in the same row.
+
+Summary Table:
+Check	Why?
+Column	To ensure only one queen per column
+Diagonals	To ensure queens do not attack diagonally
+Row	❌ Not checked, as recursion enforces one queen per row
+
+If you want:
+✅ A visual diagram showing how this enforces single queens per row,
+✅ A memory-efficient implementation note,
+✅ Or bitmask logic leveraging this property,
+
+let me know for your interview preparation.
+
+
 Why does the N-Queens backtracking algorithm only check the upper diagonals and upper columns?
 ✅ Core Reason:
 You are placing queens row by row from top to bottom (row 0 to n-1).
