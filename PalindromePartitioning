@@ -1,0 +1,204 @@
+/*
+
+https://leetcode.com/explore/interview/card/top-interview-questions-hard/119/backtracking/852/
+
+Given a string s, partition s such that every substring of the partition is a palindrome. Return all possible palindrome partitioning of s.
+
+ 
+
+Example 1:
+
+Input: s = "aab"
+Output: [["a","a","b"],["aa","b"]]
+Example 2:
+
+Input: s = "a"
+Output: [["a"]]
+ 
+
+Constraints:
+
+1 <= s.length <= 16
+s contains only lowercase English letters.
+
+
+
+
+
+
+Here is a **clear, intuitive explanation** for:
+
+> **“Each character can be partitioned/cut or not ➔ 2^N possible partitions”**
+
+---
+
+## 1️⃣ What it means:
+
+Given:
+
+```
+s = "abc"
+```
+
+You want **all ways to partition `s` into substrings.**
+
+**Between each character, you can either:**
+
+* **Place a cut (partition),**
+* **Or not place a cut.**
+
+---
+
+### **Where can cuts be placed?**
+
+For a string of length `N`, there are `N - 1` places where cuts can be placed:
+
+```
+a | b | c
+```
+
+Positions:
+
+* Between `a` and `b`
+* Between `b` and `c`
+
+---
+
+### **For each cut position:**
+
+You have **2 choices:**
+
+* **Place a cut**
+* **Do not place a cut**
+
+For `N - 1` positions, the **total number of combinations**:
+
+$$
+2^{N-1}
+$$
+
+---
+
+### **Why do we say “\~ 2^N” instead of “2^{N-1}”?**
+
+In **complexity analysis**, we approximate:
+
+* $2^{N-1} = O(2^N)$
+
+since for large `N`, the constant factor `0.5` does not matter in **Big O notation**.
+
+---
+
+## 2️⃣ Example: `"abc"`
+
+`N = 3`, `N-1 = 2` positions:
+
+* **Positions:** between `a|b` and `b|c`
+
+**Total combinations = $2^2 = 4$:**
+
+\| Cut between `a|b` | Cut between `b|c` | Partition Result |
+\|:------------------:|:------------------:|:----------------:|
+\| ❌                  | ❌                  | `"abc"`          |
+\| ❌                  | ✅                  | `"ab"`, `"c"`    |
+\| ✅                  | ❌                  | `"a"`, `"bc"`    |
+\| ✅                  | ✅                  | `"a"`, `"b"`, `"c"` |
+
+---
+
+## 3️⃣ Why relevant for **palindrome partitioning**?
+
+In **palindrome partitioning:**
+
+* You **explore all possible partitions**.
+* At each position:
+
+  * You check whether a substring (`s[start:end]`) is a palindrome.
+  * If it is, **you recursively partition the remaining string.**
+* This exploration leads to **all partition combinations**.
+
+The **number of different partitioning paths your recursion explores is \~ `2^N`** in the **worst case** when all substrings are palindromes.
+
+---
+
+## 4️⃣ Summary:
+
+✅ For **partitioning problems**:
+
+* **Each position between characters ➔ 2 choices (cut / no cut)**.
+* For `N - 1` positions:
+
+  * Total = $2^{N-1} = O(2^N)$.
+    ✅ For **palindrome partitioning**, since you explore **all such cut combinations**, your **time complexity is O(N \* 2^N)** (N for checking palindromes).
+
+---
+
+If you would like:
+✅ A **visual diagram** showing cuts and partitions
+✅ A **dry-run on "aab"** with the backtracking recursion tree
+✅ Explanation of **space complexity** in this context
+
+let me know to deepen your systematic interview prep efficiently.
+
+*/
+
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class PalindromePartitioning {
+
+    public List<List<String>> partition(String s) {
+        List<List<String>> result = new ArrayList<>();
+        backtrack(s, 0, new ArrayList<>(), result);
+        return result;
+    }
+
+    private void backtrack(String s, int start, List<String> path, List<List<String>> result) {
+        if (start == s.length()) {
+            result.add(new ArrayList<>(path));
+            return;
+        }
+      /*
+            Java substring(start, end) extracts characters up to end - 1.
+
+            If you want to include the last character of the string in your substring, you need, end <= s.length():
+            String s = "aab";
+            len = 3
+
+            In your current code:
+
+            For start = 0, end iterates over 1, 2 only.
+
+            You will never get substring(0, 3) = "aab", missing potential valid palindromic partitions.
+        */
+        for (int end = start + 1; end <= s.length(); end++) {
+            String substring = s.substring(start, end);
+            if (isPalindrome(substring)) {
+                path.add(substring);                  // choose
+                backtrack(s, end, path, result);     // explore
+                path.remove(path.size() - 1);        // unchoose (backtrack)
+            }
+        }
+    }
+
+    private boolean isPalindrome(String s) {
+        int left = 0, right = s.length() - 1;
+        while (left < right) {
+            if (s.charAt(left) != s.charAt(right)) {
+                return false;
+            }
+            left++;
+            right--;
+        }
+        return true;
+    }
+
+    // For quick testing
+    public static void main(String[] args) {
+        PalindromePartitioning pp = new PalindromePartitioning();
+        String s = "aab";
+        List<List<String>> partitions = pp.partition(s);
+        System.out.println(partitions);
+    }
+}
