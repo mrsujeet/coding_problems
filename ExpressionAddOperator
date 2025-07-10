@@ -1,0 +1,88 @@
+/*
+https://leetcode.com/explore/interview/card/facebook/57/others-3/3039/
+https://leetcode.com/problems/expression-add-operators/
+
+Given a string num that contains only digits and an integer target, return all possibilities to insert the binary operators '+', '-', and/or '*' between the digits of num so that the resultant expression evaluates to the target value.
+
+Note that operands in the returned expressions should not contain leading zeros.
+
+ 
+
+Example 1:
+
+Input: num = "123", target = 6
+Output: ["1*2*3","1+2+3"]
+Explanation: Both "1*2*3" and "1+2+3" evaluate to 6.
+Example 2:
+
+Input: num = "232", target = 8
+Output: ["2*3+2","2+3*2"]
+Explanation: Both "2*3+2" and "2+3*2" evaluate to 8.
+Example 3:
+
+Input: num = "3456237490", target = 9191
+Output: []
+Explanation: There are no expressions that can be created from "3456237490" to evaluate to 9191.
+ 
+
+Constraints:
+
+1 <= num.length <= 10
+num consists of only digits.
+-231 <= target <= 231 - 1
+
+*/
+
+
+public List<String> addOperators(String num, int target) {
+    List<String> res = new ArrayList<>();
+    // Start DFS with:
+    // index = 0 (start of num)
+    // calc = 0 (current evaluated value)
+    // tail = 0 (last operand value for handling multiplication)
+    // path = "" (current expression being built)
+    dfs(num, target, res, 0, 0, 0, "");
+    return res;
+}
+
+private void dfs(String num, int target, List<String> res, int index, long calc, long tail, String path) {
+    // Base case: if we have processed the entire string
+    if (index == num.length()) {
+        // If the calculated value equals the target, add the expression to the result
+        if (calc == target) {
+            res.add(path);
+        }
+        return;
+    }
+
+    // Loop to partition the string and try all possible splits
+    for (int i = index; i < num.length(); i++) {
+        // Avoid numbers with leading zeros (e.g., "05", "00") but allow "0"
+        if (i != index && num.charAt(i) == '0') {
+            break;
+        }
+
+        // Get the current number substring and parse it to a long
+        String currStr = num.substring(index, i + 1);
+        long curr = Long.parseLong(currStr);
+
+        if (index == 0) {
+            // If this is the first number, we start the expression without any operator
+            dfs(num, target, res, i + 1, curr, curr, currStr);
+        } else {
+            // Case 1: Addition
+            // Add the current number to the calculated value
+            dfs(num, target, res, i + 1, calc + curr, curr, path + '+' + currStr);
+
+            // Case 2: Subtraction
+            // Subtract the current number from the calculated value
+            dfs(num, target, res, i + 1, calc - curr, -curr, path + '-' + currStr);
+
+            // Case 3: Multiplication
+            // To handle multiplication precedence:
+            // remove the last added operand (tail) from calc,
+            // and add (tail * curr) to calc
+            dfs(num, target, res, i + 1, calc - tail + tail * curr, tail * curr, path + '*' + currStr);
+        }
+    }
+}
