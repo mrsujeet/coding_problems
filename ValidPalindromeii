@@ -1,0 +1,61 @@
+/*
+
+https://leetcode.com/problems/valid-palindrome-ii/description/
+
+Given a string s, return true if the s can be palindrome after deleting at most one character from it.
+
+ 
+
+Example 1:
+
+Input: s = "aba"
+Output: true
+Example 2:
+
+Input: s = "abca"
+Output: true
+Explanation: You could delete the character 'c'.
+Example 3:
+
+Input: s = "abc"
+Output: false
+ 
+
+Constraints:
+
+1 <= s.length <= 105
+s consists of lowercase English letters.
+
+*/
+
+
+
+     public boolean validPalindrome(String s) {
+        int len=s.length();
+
+        for(int i=0; i<len/2; i++ ){
+            char left=s.charAt(i);
+            char right=s.charAt(len-1-i);
+            if(left!=right){
+                return isPalindrome(i+1,len-1-i,s)||isPalindrome(i,len-2-i,s);
+            }
+
+        }
+
+        return true;
+     }
+
+    
+
+     private boolean isPalindrome(int l, int r, String s){
+        while(l<r){
+            if(s.charAt(l)!=s.charAt(r)){
+                return false;
+            }
+            l++;
+            r--;
+        }
+        return true;
+     }
+
+
