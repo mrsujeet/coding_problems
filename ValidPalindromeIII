@@ -1,0 +1,403 @@
+/*
+https://leetcode.com/problems/valid-palindrome-iii/description/?envType=company&envId=facebook&favoriteSlug=facebook-thirty-days
+
+Given a string s and an integer k, return true if s is a k-palindrome.
+
+A string is k-palindrome if it can be transformed into a palindrome by removing at most k characters from it.
+
+ 
+
+Example 1:
+
+Input: s = "abcdeca", k = 2
+Output: true
+Explanation: Remove 'b' and 'e' characters.
+Example 2:
+
+Input: s = "abbababa", k = 1
+Output: true
+ 
+
+Constraints:
+
+1 <= s.length <= 1000
+s consists of only lowercase English letters.
+1 <= k <= s.length
+
+*/
+
+class Solution {
+   //method 1: Version with Memoization
+
+    public boolean isValidPalindrome(String s, int k) {
+        Map<String, Boolean> memo= new HashMap<>();
+        return helper(s,k,memo,0,s.length()-1);
+
+    }
+
+    private boolean helper(String s, int k, Map<String,Boolean> memo,int l, int r){
+        if(l>=r) return true;
+
+        String key=l+","+r+","+k;
+
+        if(memo.containsKey(key)) return memo.get(key);
+
+        if(s.charAt(l)==s.charAt(r)){
+            memo.put(key,helper(s,k,memo,l+1,r-1));
+        }
+        else if(k==0) return false;
+
+        else{
+            memo.put(key,helper(s,k-1,memo,l+1,r)|| helper(s,k-1,memo,l,r-1));
+        }
+
+        return memo.get(key);
+
+    }
+
+/*
+
+
+```java
+if (k == 0) {
+    memo.put(key, false);
+}
+```
+
+This line sets `false` in the memoization map when we have no deletions (`k == 0`) **and** we're facing a mismatch between `s.charAt(l)` and `s.charAt(r)`.
+
+Let’s walk through **why** that’s correct.
+
+---
+
+## ✅ Context Recap:
+
+We're checking if a substring `s[l..r]` can be turned into a palindrome by removing **at most `k` characters**.
+
+* If `s.charAt(l) != s.charAt(r)` and
+* `k == 0`, then
+* ❌ We can't fix this mismatch anymore — no deletions left.
+
+Therefore, **this path is invalid**.
+
+---
+
+## ✅ Why do we `memo.put(key, false)`?
+
+### Reason:
+
+This state `(l, r, k=0)` is now a **dead end** in recursion, and we’re caching it to avoid recomputing in the future.
+
+If we don’t memoize it:
+
+* The recursion will revisit the same bad `(l, r, 0)` path over and over again
+* Wasting time
+
+So, we save:
+
+```java
+memo.put(key, false);
+```
+
+To remember: "For this `(l, r, 0)`, it's not fixable → don’t try it again."
+
+---
+
+## 🧠 Example
+
+```java
+s = "abca", k = 0
+l = 0, r = 3 → 'a' == 'a' → go inward
+
+l = 1, r = 2 → 'b' != 'c', and k == 0 → ❌ can't fix
+
+→ return false
+→ memo.put("1,2,0", false)
+```
+
+So next time recursion hits `"1,2,0"` → no need to recompute — it knows it's impossible.
+
+---
+
+## ✅ Summary
+
+| Condition                | Meaning                         | Memo value |
+| ------------------------ | ------------------------------- | ---------- |
+| `s[l] != s[r] && k == 0` | Can't remove anymore, dead path | `false`    |
+
+Let me know if you'd like to walk through a full dry-run with `memo` visualization.
+
+Absolutely! Let’s walk through the **time and space complexity** of your **recursive + memoized** solution to check if a string is a k-palindrome.
+
+---
+
+### ✅ Your Function:
+
+```java
+boolean helper(String s, int l, int r, int k, Map<String, Boolean> memo)
+```
+
+This function explores whether `s[l..r]` can become a palindrome by deleting at most `k` characters.
+
+---
+
+## 🔍 Time Complexity
+
+We need to analyze:
+
+1. **How many unique states** we may compute
+2. **How much work** each state takes
+
+---
+
+### 1️⃣ **Number of unique subproblems**
+
+Each recursive call depends on:
+
+* `l` (left index)
+* `r` (right index)
+* `k` (number of deletions left)
+
+So the number of unique states is:
+
+```
+O(n² × (k + 1))
+```
+
+* `l` can range from `0` to `n-1`
+* `r` can range from `0` to `n-1`
+* `k` ranges from `0` to the input `k`
+
+Each combination of `(l, r, k)` may be memoized exactly once.
+
+---
+
+### 2️⃣ **Work per state**
+
+Each state does:
+
+* A few character comparisons
+* At most two recursive calls (only if characters don't match and `k > 0`)
+* Constant work per call: `O(1)`
+
+---
+
+### ⏱ Final Time Complexity:
+
+```
+O(n² × k)
+```
+
+---
+
+## 🧠 Space Complexity
+
+### 1. **Memoization Map:**
+
+* At most `O(n² × k)` entries stored
+
+### 2. **Call Stack (Recursion):**
+
+* Max depth = `O(n)` (when removing no characters and just walking inward)
+
+---
+
+### 📦 Final Space Complexity:
+
+```
+O(n² × k)  space for memo
++ O(n)     for recursion stack
+= O(n² × k)
+```
+
+---
+
+## ✅ Summary Table
+
+| Measure          | Complexity  |
+| ---------------- | ----------- |
+| **Time**         | `O(n² × k)` |
+| **Space** (memo) | `O(n² × k)` |
+| **Stack depth**  | `O(n)`      |
+
+---
+
+Let me know if you want:
+
+* A **bottom-up dynamic programming** version (iterative)
+* Or a **space-optimized** version of this solution
+
+
+*/
+ 
+ 
+ 
+ 
+ 
+ /*   
+ //method 2
+ public boolean isValidPalindrome(String s, int k) {
+        return helper(s, 0, s.length() - 1, k);
+    }
+
+private boolean helper(String s, int l, int r, int k) {
+    if (l >= r) return true;
+
+    if (s.charAt(l) == s.charAt(r)) {
+        return helper(s, l + 1, r - 1, k);
+    }
+
+    if (k == 0) return false; // it reaches here, it means left and right character mismatch. Also, k==0 it means all allowed quota has been consumed.
+
+    return helper(s, l + 1, r, k - 1) || helper(s, l, r - 1, k - 1);
+} */
+/*
+Absolutely! Let's break this recursive solution **line-by-line and step-by-step** so you understand **exactly what happens** at each level.
+
+---
+
+## 🎯 Goal
+
+Determine if a string `s` can be converted into a palindrome by **removing at most `k` characters**.
+
+---
+
+## ✅ Code
+
+```java
+public boolean isValidPalindrome(String s, int k) {
+    return helper(s, 0, s.length() - 1, k);
+}
+
+private boolean helper(String s, int l, int r, int k) {
+    if (l >= r) return true;
+
+    if (s.charAt(l) == s.charAt(r)) {
+        return helper(s, l + 1, r - 1, k);
+    }
+
+    if (k == 0) return false;
+
+    return helper(s, l + 1, r, k - 1) || helper(s, l, r - 1, k - 1);
+}
+```
+
+---
+
+## 🧠 High-Level Idea
+
+This is a **recursive, depth-first search** approach.
+
+At each mismatch between characters `s[l]` and `s[r]`, you can:
+
+* Remove `s[l]` → reduce `k`, move `l+1`
+* Remove `s[r]` → reduce `k`, move `r-1`
+
+You stop when:
+
+* Pointers cross (means string is now a palindrome) ✅
+* You run out of allowed removals (k == 0) ❌
+
+---
+
+## 🔍 Step-by-Step Explanation
+
+### 📌 Step 1: Base Case
+
+```java
+if (l >= r) return true;
+```
+
+* When `l` crosses or meets `r`, the remaining substring is trivially a palindrome.
+* This stops recursion.
+
+---
+
+### 📌 Step 2: Characters match
+
+```java
+if (s.charAt(l) == s.charAt(r)) {
+    return helper(s, l + 1, r - 1, k);
+}
+```
+
+* If characters at both ends match, move both inward.
+* No deletions needed — preserve `k`.
+
+---
+
+### 📌 Step 3: Characters do not match
+
+```java
+if (k == 0) return false;
+```
+
+* If mismatch and `k == 0`, you can’t delete anymore → not possible to become a palindrome.
+
+---
+
+### 📌 Step 4: Try both delete options
+
+```java
+return helper(s, l + 1, r, k - 1) || helper(s, l, r - 1, k - 1);
+```
+
+* Try deleting either the left char or the right char.
+* Decrease `k` by 1 in each case.
+* If **either path returns `true`**, it's possible.
+
+---
+
+## 🧪 Dry Run Example
+
+```java
+s = "abcdeca", k = 2
+```
+
+* `l = 0, r = 6 → s[0] = 'a', s[6] = 'a' → match → recurse (1,5,2)`
+* `l = 1, r = 5 → s[1] = 'b', s[5] = 'c' → mismatch`
+
+  * Try remove 'b': recurse (2,5,1)
+  * Try remove 'c': recurse (1,4,1)
+
+Now multiple branches are explored recursively — each keeping track of how many deletions were made (`k` decreased) and stopping as soon as we get a match or exhaust deletions.
+
+Eventually:
+
+* We reach a state where `l >= r` → return `true`, and that bubbles up
+* Or all paths fail (`k == 0` and still mismatched) → return `false`
+
+---
+
+## ✅ Example Outputs
+
+| Input          | Output  | Explanation                                        |
+| -------------- | ------- | -------------------------------------------------- |
+| `"abcdeca", 2` | `true`  | Remove `'b'` and `'e'` → `"acdca"` is a palindrome |
+| `"abca", 1`    | `true`  | Remove `'b'` or `'c'` → `"aca"` or `"aba"`         |
+| `"abcdef", 2`  | `false` | Needs more than 2 deletions                        |
+
+---
+
+## ⏱ Time Complexity
+
+* Worst-case: `O(2^k)`
+  Because each mismatch can split into 2 paths, and we do this up to `k` times.
+
+---
+
+## ✅ Summary
+
+| Condition             | Meaning                             |
+| --------------------- | ----------------------------------- |
+| `l >= r`              | Base case: valid palindrome         |
+| `s[l] == s[r]`        | Characters match — move inward      |
+| Mismatch and `k == 0` | Can't delete — fail                 |
+| Mismatch and `k > 0`  | Try both deletions (`l+1` or `r-1`) |
+
+---
+
+Let me know if you'd like to see this version **optimized with memoization** to avoid duplicate subproblem calls.
+
+*/
+}
