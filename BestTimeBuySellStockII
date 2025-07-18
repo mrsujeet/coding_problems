@@ -85,7 +85,7 @@ But summing all `positive differences` is simpler and gives the same result.
     public int maxProfit(int[] prices) {
         int maxProfit=0;
         for(int i=1; i<prices.length; i++){
-            if(prices[i]>prices[i-1]){
+            if(prices[i]>prices[i-1]){ // buying only when price is up from previous day.
                 maxProfit+=prices[i]-prices[i-1];
             }
 
