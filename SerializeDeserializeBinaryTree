@@ -1,0 +1,91 @@
+/*
+
+https://leetcode.com/explore/interview/card/facebook/56/design-3/271/
+
+
+Serialization is the process of converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.
+
+Design an algorithm to serialize and deserialize a binary tree. There is no restriction on how your serialization/deserialization algorithm should work. You just need to ensure that a binary tree can be serialized to a string and this string can be deserialized to the original tree structure.
+
+Clarification: The input/output format is the same as how LeetCode serializes a binary tree. You do not necessarily need to follow this format, so please be creative and come up with different approaches yourself.
+
+ 
+
+Example 1:
+
+
+Input: root = [1,2,3,null,null,4,5]
+Output: [1,2,3,null,null,4,5]
+
+Note:
+1. Integer.parseInt(String s)
+Returns: a primitive int
+
+Usage: When you just need a raw int value.
+
+java
+Copy
+Edit
+int x = Integer.parseInt("123");
+System.out.println(x);  // Output: 123
+✅ 2. Integer.valueOf(String s)
+Returns: an Integer object (wrapper class)
+
+Usage: When an Integer object is required, e.g., with collections like HashMap<Integer, ...>
+
+java
+Copy
+Edit
+Integer y = Integer.valueOf("123");
+System.out.println(y);  // Output: 123
+✅ Internal Behavior
+Integer.valueOf(s) internally calls Integer.parseInt(s) and then boxes the result:
+
+java
+Copy
+Edit
+return Integer.valueOf(Integer.parseInt(s));
+*/
+
+
+
+ public String serialize(TreeNode root) { 
+
+        StringBuilder sb = new StringBuilder();
+        serializeHelper(sb,root);
+        return sb.toString();
+
+    }
+
+   private void serializeHelper(StringBuilder sb,TreeNode root){
+        if(root==null){
+            sb.append("null,");
+            return;
+        }
+        sb.append(root.val);
+        sb.append(",");
+        serializeHelper(sb,root.left);
+        serializeHelper(sb,root.right);
+    }
+
+
+    public TreeNode deserialize(String s){
+        String [] stArr=s.split(",");
+        List<String> list=new LinkedList<>(Arrays.asList(stArr));
+        return deserializeHelper(list);
+
+    }
+
+    private TreeNode deserializeHelper(List<String> list){
+        if(list.get(0).equals("null")){
+            list.remove(0);
+            return null;
+        }
+        TreeNode root = new TreeNode(Integer.parseInt(list.get(0)));
+        list.remove(0);
+        root.left=deserializeHelper(list);
+        root.right=deserializeHelper(list);
+        return root;
+
+    }
+
