@@ -1,0 +1,81 @@
+/*
+
+
+
+https://leetcode.com/problems/longest-substring-with-at-most-k-distinct-characters/description/
+https://leetcode.com/explore/interview/card/facebook/5/array-and-strings/3017/
+Given a string s and an integer k, return the length of the longest substring of s that contains at most k distinct characters.
+
+ 
+
+Example 1:
+
+Input: s = "eceba", k = 2
+Output: 3
+Explanation: The substring is "ece" with length 3.
+Example 2:
+
+Input: s = "aa", k = 1
+Output: 2
+Explanation: The substring is "aa" with length 2.
+ 
+
+Constraints:
+
+1 <= s.length <= 5 * 104
+0 <= k <= 50
+
+
+
+Hint:
+let’s say it were:
+s = "aabac", k = 2
+The real danger comes when a character repeats later and masks earlier occurrences.
+
+✅ Correct Strategy:
+Instead of assuming s.charAt(start) is the character to evict:
+
+You search the map for the character with the minimum last-seen index.
+
+That one is truly the leftmost.
+int delIndex = Collections.min(map.values());
+map.remove(s.charAt(delIndex));
+start = delIndex + 1;
+🔁 Summary:
+✅ You're right that map.put(c, end) always updates to the latest index.
+
+❌ This means map.get(s.charAt(start)) doesn't guarantee it's pointing to the leftmost character anymore.
+
+✅ Hence, we must search the map for the actual leftmost index using Collections.min().
+
+*/
+
+
+
+class Solution {
+ 
+    int start=0;
+    int maxLen=0;
+    Map<Character, Integer> map=new HashMap<>();
+
+    public int lengthOfLongestSubstringKDistinct(String s, int k) {
+
+        for(int end=0; end<s.length(); end++){
+            char c=s.charAt(end);
+            map.put(c,end); // each step updating character with current index
+
+            if(map.size()<=k){
+                maxLen=maxLen<=end-start+1?end-start+1:maxLen;
+            }else{
+                int idx=Collections.min(map.values()); //left most index to release
+                map.remove(s.charAt(idx));
+                start=idx+1;
+                
+            }
+
+        }
+
+        return maxLen;
+        
+    }
+}
