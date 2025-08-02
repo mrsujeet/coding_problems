@@ -34,6 +34,13 @@ Constraints:
 3 <= nums.length <= 3000
 -105 <= nums[i] <= 105
 
+Note:
+
+Time and Space Complexity
+Time Complexity: O(n^2) — Outer loop O(n) × inner two-pointer O(n)
+
+Space Complexity: O(1) (ignoring output list)
+
 */
 
 
