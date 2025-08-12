@@ -1,0 +1,210 @@
+/*
+https://leetcode.com/problems/construct-binary-tree-from-preorder-and-inorder-traversal/description/
+
+Given two integer arrays preorder and inorder where preorder is the preorder traversal of a binary tree and inorder is the inorder traversal of the same tree, construct and return the binary tree.
+
+ 
+
+Example 1:
+
+
+Input: preorder = [3,9,20,15,7], inorder = [9,3,15,20,7]
+Output: [3,9,20,null,null,15,7]
+Example 2:
+
+Input: preorder = [-1], inorder = [-1]
+Output: [-1]
+ 
+
+Constraints:
+
+1 <= preorder.length <= 3000
+inorder.length == preorder.length
+-3000 <= preorder[i], inorder[i] <= 3000
+preorder and inorder consist of unique values.
+Each value of inorder also appears in preorder.
+preorder is guaranteed to be the preorder traversal of the tree.
+inorder is guaranteed to be the inorder traversal of the tree.
+
+Note:
+### **Where it appears**
+
+```java
+private TreeNode helper(int[] preorder, int inStart, int inEnd) {
+    // Base case: no nodes to build
+    if (inStart > inEnd) return null;
+    ...
+}
+```
+
+---
+
+### **Meaning of `inStart` and `inEnd`**
+
+* **`inStart`** = starting index of the current subtree’s range in the **inorder** array.
+* **`inEnd`** = ending index of the current subtree’s range in the **inorder** array.
+
+When we recursively build subtrees, we **narrow down** this range:
+
+* Left subtree gets the **left half** of the inorder segment.
+* Right subtree gets the **right half**.
+
+---
+
+### **Why `inStart > inEnd` means STOP**
+
+* If `inStart == inEnd`, it means the segment has **exactly 1 node**, so we can still create a leaf node.
+* If `inStart > inEnd`, it means **there are no nodes left to build** for this subtree.
+  This happens when:
+
+  * We just placed the last node.
+  * We’ve already processed all elements in that segment.
+
+Returning `null` tells Java:
+
+* “This child does not exist.”
+* The recursion should **end here** for this branch.
+
+---
+
+### **Example Walkthrough**
+
+Let’s take:
+
+```
+preorder = [3, 9, 20, 15, 7]
+inorder  = [9, 3, 15, 20, 7]
+```
+
+1. Start with:
+
+   ```
+   inStart = 0, inEnd = 4  // whole inorder array
+   root = 3
+   ```
+
+   Left subtree range = `inStart = 0, inEnd = 0` (only `[9]`)
+   Right subtree range = `inStart = 2, inEnd = 4` (only `[15, 20, 7]`)
+
+2. For the left subtree:
+
+   ```
+   inStart = 0, inEnd = 0
+   root = 9
+   Left subtree range: inStart = 0, inEnd = -1  → STOP
+   Right subtree range: inStart = 1, inEnd = 0 → STOP
+   ```
+
+   Here, **`inStart > inEnd`**, so `return null`.
+
+3. This ensures that `9.left = null` and `9.right = null`.
+
+---
+
+### **If We Didn’t Have This Check**
+
+Without:
+
+```java
+if (inStart > inEnd) return null;
+```
+
+* The recursion would **never stop** when the segment becomes empty.
+* We’d keep calling `helper()` with invalid ranges, eventually causing an **ArrayIndexOutOfBoundsException** or **stack overflow**.
+
+---
+
+💡 In short:
+**`if (inStart > inEnd) return null;`**
+→ “If there are no elements left in the inorder range, stop and return an empty (null) branch.”
+
+
+*/
+
+
+import java.util.*;
+
+// ############################################################
+// # TreeNode: Represents each node of the binary tree
+// ############################################################
+class TreeNode {
+    int val;       // value of the node
+    TreeNode left; // pointer to left child
+    TreeNode right;// pointer to right child
+
+    TreeNode(int x) {
+        val = x;
+    }
+}
+
+public class BuildTree {
+    // Map to store inorder value → index for O(1) lookups
+    private Map<Integer, Integer> inorderMap;
+
+    // Pointer to current root position in preorder array
+    private int preIndex = 0;
+
+    // Build binary tree from preorder & inorder arrays
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        // Step 1: Fill hashmap for inorder index lookups
+        inorderMap = new HashMap<>();
+        for (int i = 0; i < inorder.length; i++) {
+            inorderMap.put(inorder[i], i);
+        }
+        // Step 2: Recursively construct the tree
+        return helper(preorder, 0, inorder.length - 1);
+    }
+
+    // Recursive helper to build subtree
+    private TreeNode helper(int[] preorder, int inStart, int inEnd) {
+        // Base case: no nodes to build
+        if (inStart > inEnd) return null;
+
+        // Step 1: Pick root from preorder
+        int rootVal = preorder[preIndex++];
+
+        // Step 2: Create the root node
+        TreeNode root = new TreeNode(rootVal);
+
+        // Step 3: Get root index in inorder
+        int inIndex = inorderMap.get(rootVal);
+
+        // Step 4: Build left subtree
+        root.left = helper(preorder, inStart, inIndex - 1);
+
+        // Step 5: Build right subtree
+        root.right = helper(preorder, inIndex + 1, inEnd);
+
+        return root;
+    }
+
+    public static void main(String[] args) {
+        BuildTree bt = new BuildTree();
+
+        // Example input
+        int[] preorder = {3, 9, 20, 15, 7};
+        int[] inorder  = {9, 3, 15, 20, 7};
+
+        /*
+         preorder[0] = 3 → root
+         inorder: left = [9], right = [15, 20, 7]
+         left subtree: 9 (leaf)
+         right subtree root = 20
+         inorder split: [15] and [7]
+         preorder order → 15 (left), 7 (right)
+        */
+
+        TreeNode root = bt.buildTree(preorder, inorder);
+
+        System.out.print("Inorder of constructed tree: ");
+        printInorder(root); // Expected: 9 3 15 20 7
+    }
+
+    // Utility: print inorder traversal
+    public static void printInorder(TreeNode node) {
+        if (node == null) return;
+        printInorder(node.left);
+        System.out.print(node.val + " ");
+        printInorder(node.right);
+    }
+}
