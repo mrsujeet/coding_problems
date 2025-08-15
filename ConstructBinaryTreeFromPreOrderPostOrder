@@ -1,0 +1,234 @@
+/*
+
+https://leetcode.com/problems/construct-binary-tree-from-preorder-and-postorder-traversal/description/
+
+
+Given two integer arrays, preorder and postorder where preorder is the preorder traversal of a binary tree of distinct values and postorder is the postorder traversal of the same tree, reconstruct and return the binary tree.
+
+If there exist multiple answers, you can return any of them.
+
+ 
+
+Example 1:
+
+
+Input: preorder = [1,2,4,5,3,6,7], postorder = [4,5,2,6,7,3,1]
+Output: [1,2,3,4,5,6,7]
+Example 2:
+
+Input: preorder = [1], postorder = [1]
+Output: [1]
+ 
+
+Constraints:
+
+1 <= preorder.length <= 30
+1 <= preorder[i] <= preorder.length
+All the values of preorder are unique.
+postorder.length == preorder.length
+1 <= postorder[i] <= postorder.length
+All the values of postorder are unique.
+It is guaranteed that preorder and postorder are the preorder traversal and postorder traversal of the same binary tree.
+
+*/
+
+/*
+Hint:
+
+Of course. Here's how to construct a binary tree from its preorder and postorder traversals, including the important limitation of this method.
+
+You can construct a binary tree from its preorder and postorder traversals, but the resulting tree is **not always unique**. If the tree is a **full binary tree** (where every node has either 0 or 2 children), then the construction is unique. However, if a node can have only one child, multiple tree structures can produce the same preorder and postorder traversals.
+
+The core idea is to use the properties of the traversals to recursively identify the root, left subtree, and right subtree.
+
+  * **Preorder Traversal:** Visits nodes in the order: **Root** -\> Left Subtree -\> Right Subtree.
+  * **Postorder Traversal:** Visits nodes in the order: Left Subtree -\> Right Subtree -\> **Root**.
+
+-----
+
+### The Algorithm
+
+The algorithm is recursive and follows these steps:
+
+1.  **Identify the Root:** The **first** element of the preorder traversal is always the root of the current tree or subtree. This same node will be the **last** element of the postorder traversal.
+
+2.  **Identify the Left Subtree Root:** The **second** element in the preorder traversal is the root of the left subtree (assuming the tree is full and has a left child).
+
+3.  **Find the Left Subtree Boundary:** Locate the left subtree's root (from step 2) in the postorder traversal. All elements from the beginning of the postorder array up to and including this node belong to the left subtree.
+
+4.  **Partition the Arrays:** Use the size of the left subtree (found in step 3) to divide both the preorder and postorder arrays into sections for the left and right subtrees.
+
+5.  **Recurse:** Recursively apply these steps to the partitioned arrays to build the left and right subtrees, and attach them to the root.
+
+-----
+
+### Step-by-Step Example 🌳
+
+Let's build a tree from the following traversals:
+
+  * **Preorder:** `[1, 2, 4, 5, 3, 6, 7]`
+  * **Postorder:** `[4, 5, 2, 6, 7, 3, 1]`
+
+#### **Call 1: Full Tree**
+
+  * **Preorder:** `[1, 2, 4, 5, 3, 6, 7]`
+  * **Postorder:** `[4, 5, 2, 6, 7, 3, 1]`
+
+<!-- end list -->
+
+1.  **Root:** The root is `1` (the first element of preorder).
+2.  **Left Subtree Root:** The root of the left subtree is `2` (the second element of preorder).
+3.  **Left Subtree Boundary:** Find `2` in postorder: `[4, 5, 2]`. This section, of size 3, represents the left subtree.
+4.  **Partition:**
+      * **Left Subtree:**
+          * Preorder: `[2, 4, 5]` (the 3 elements after the root `1`)
+          * Postorder: `[4, 5, 2]` (the first 3 elements)
+      * **Right Subtree:**
+          * Preorder: `[3, 6, 7]` (the remaining elements)
+          * Postorder: `[6, 7, 3]` (the elements between the left subtree and the root `1`)
+5.  **Recurse:** Now we make two recursive calls.
+
+-----
+
+#### **Call 2: Left Subtree of 1**
+
+  * **Preorder:** `[2, 4, 5]`
+  * **Postorder:** `[4, 5, 2]`
+
+<!-- end list -->
+
+1.  **Root:** The root is `2`.
+2.  **Left Subtree Root:** The root of its left subtree is `4`.
+3.  **Left Subtree Boundary:** Find `4` in postorder: `[4]`. The left subtree has size 1.
+4.  **Partition:**
+      * **Left Subtree:** Preorder `[4]`, Postorder `[4]`. This creates node `4`.
+      * **Right Subtree:** Preorder `[5]`, Postorder `[5]`. This creates node `5`.
+5.  **Result:** A subtree with root `2`, left child `4`, and right child `5` is returned.
+
+-----
+
+#### **Call 3: Right Subtree of 1**
+
+  * **Preorder:** `[3, 6, 7]`
+  * **Postorder:** `[6, 7, 3]`
+
+<!-- end list -->
+
+1.  **Root:** The root is `3`.
+2.  **Left Subtree Root:** The root of its left subtree is `6`.
+3.  **Left Subtree Boundary:** Find `6` in postorder: `[6]`. The left subtree has size 1.
+4.  **Partition:**
+      * **Left Subtree:** Preorder `[6]`, Postorder `[6]`. This creates node `6`.
+      * **Right Subtree:** Preorder `[7]`, Postorder `[7]`. This creates node `7`.
+5.  **Result:** A subtree with root `3`, left child `6`, and right child `7` is returned.
+
+#### **Final Assembly**
+
+The main call connects these pieces: the root is `1`, its left child is the tree rooted at `2`, and its right child is the tree rooted at `3`.
+
+The final constructed tree is:
+
+```mermaid
+graph TD
+    1 --> 2
+    1 --> 3
+    2 --> 4
+    2 --> 5
+    3 --> 6
+    3 --> 7
+```
+
+-----
+
+### The Ambiguity Problem 🤔
+
+The issue arises when a node has only one child. Because the algorithm assumes the second element of a preorder traversal is the *left* child's root, it cannot distinguish between a single left child and a single right child.
+
+Consider these two different trees:
+
+| Tree A (Node 2 is a left child) | Tree B (Node 2 is a right child) |
+| :------------------------------: | :-------------------------------: |
+| `1` \<br\> `  / ` \<br\> `2` | `1` \<br\> `  \ ` \<br\> `   2 ` |
+| **Preorder:** `[1, 2]` | **Preorder:** `[1, 2]` |
+| **Postorder:** `[2, 1]` | **Postorder:** `[2, 1]` |
+
+Both trees produce the **exact same** preorder and postorder traversals. Therefore, given just `preorder = [1, 2]` and `postorder = [2, 1]`, it's impossible to know which tree to build. This ambiguity is why you can only uniquely reconstruct a **full** binary tree.
+
+
+*/
+
+/*
+
+  // Global variables to hold the traversal arrays and the map for postorder indices
+    private int[] preorder;
+    private Map<Integer, Integer> postorderMap;
+    private int preIndex = 0;
+
+    /**
+     * The main public method that kicks off the construction process.
+     * @param preorder The preorder traversal of the binary tree.
+     * @param postorder The postorder traversal of the binary tree.
+     * @return The root of the constructed binary tree.
+     */
+    public TreeNode constructFromPrePost(int[] preorder, int[] postorder) {
+        if (preorder == null || postorder == null || preorder.length == 0) {
+            return null;
+        }
+
+        this.preorder = preorder;
+        this.postorderMap = new HashMap<>();
+        // Create a map for fast lookup of values to their indices in postorder
+        for (int i = 0; i < postorder.length; i++) {
+            postorderMap.put(postorder[i], i);
+        }
+
+        // Start the recursive construction process
+        return buildTree(0, postorder.length - 1);
+    }
+
+    /**
+     * The recursive helper function to build the tree.
+     * @param postStart The starting index of the current subtree in the postorder array.
+     * @param postEnd The ending index of the current subtree in the postorder array.
+     * @return The root of the constructed subtree.
+     */
+    private TreeNode buildTree(int postStart, int postEnd) {
+        // Base case: If the range is invalid, we've gone beyond a leaf node
+        if (postStart > postEnd) {
+            return null;
+        }
+
+        // The current root's value is the next element in the preorder sequence.
+        // We increment preIndex after using the value.
+        TreeNode root = new TreeNode(preorder[preIndex++]);
+
+//Placing the ++ directly inside the array access preorder[preidx++] ensures that the index is advanced for every single node that gets created, which is the correct logic for the algorithm.
+
+        // If postStart == postEnd, it means this is a leaf node, so we can return it.
+        if (postStart == postEnd) {
+            return root;
+        }
+
+        // The next value in the preorder traversal is the root of the left subtree.
+        int leftSubtreeRootVal = preorder[preIndex];
+        
+        // Find the index of the left subtree's root in the postorder traversal.
+        // This index helps us determine the boundary of the left subtree.
+        int leftSubtreeEndIndexInPost = postorderMap.get(leftSubtreeRootVal);
+
+        // Recursively build the left subtree.
+        // The left subtree in postorder is from postStart to leftSubtreeEndIndexInPost.
+        root.left = buildTree(postStart, leftSubtreeEndIndexInPost);
+
+        // Recursively build the right subtree.
+        // The right subtree in postorder is from leftSubtreeEndIndexInPost + 1 to postEnd - 1.
+        // (postEnd is the current root, which we've already processed).
+        root.right = buildTree(leftSubtreeEndIndexInPost + 1, postEnd - 1);
+
+        return root;
+    }
+
+
+
+
+*/
