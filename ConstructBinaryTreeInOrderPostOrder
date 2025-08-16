@@ -1,0 +1,132 @@
+/*
+https://leetcode.com/problems/construct-binary-tree-from-inorder-and-postorder-traversal/description/
+
+Given two integer arrays inorder and postorder where inorder is the inorder traversal of a binary tree and postorder is the postorder traversal of the same tree, construct and return the binary tree.
+
+ 
+
+Example 1:
+
+
+Input: inorder = [9,3,15,20,7], postorder = [9,15,7,20,3]
+Output: [3,9,20,null,null,15,7]
+Example 2:
+
+Input: inorder = [-1], postorder = [-1]
+Output: [-1]
+ 
+
+Constraints:
+
+1 <= inorder.length <= 3000
+postorder.length == inorder.length
+-3000 <= inorder[i], postorder[i] <= 3000
+inorder and postorder consist of unique values.
+Each value of postorder also appears in inorder.
+inorder is guaranteed to be the inorder traversal of the tree.
+postorder is guaranteed to be the postorder traversal of the tree.
+
+
+
+*/
+
+/*
+To rebuild a binary tree from **inorder** and **postorder** traversals:
+
+* **Inorder**: `left, root, right`
+* **Postorder**: `left, right, root` (so the **last** element is the current subtree’s root)
+
+### Key idea
+
+1. The last element in `postorder` is the **root**.
+2. Find that root in `inorder` → it splits the inorder array into **left** and **right** subtrees.
+3. Recurse on the right subtree **first**, then left, because we consume `postorder` **from the end** (order becomes `root, right, left` when moving backwards).
+
+This runs in **O(n)** using a hashmap from node value → inorder index.
+
+---
+*/
+### Java (recursive, O(n) time, O(n) space)
+
+```java
+import java.util.*;
+
+// Definition for a binary tree node.
+class TreeNode {
+    int val;
+    TreeNode left, right;
+    TreeNode(int x) { val = x; }
+}
+
+class Solution {
+    private int postIdx;
+    private Map<Integer, Integer> inIndex; // value -> index in inorder
+
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+        if (inorder == null || postorder == null || inorder.length != postorder.length)
+            return null;
+
+        int n = inorder.length;
+        inIndex = new HashMap<>(n);
+        for (int i = 0; i < n; i++) {
+            inIndex.put(inorder[i], i);
+        }
+
+        postIdx = n - 1; // start from the end of postorder
+        return build(inorder, postorder, 0, n - 1);
+    }
+
+    // Build subtree whose inorder range is [inL .. inR]
+    private TreeNode build(int[] inorder, int[] postorder, int inL, int inR) {
+        if (inL > inR) return null;
+
+        // Current root is the last unused element in postorder
+        int rootVal = postorder[postIdx--];
+        TreeNode root = new TreeNode(rootVal);
+
+        // Split inorder at root position
+        int mid = inIndex.get(rootVal);
+
+        // IMPORTANT: build right subtree first (because postorder is consumed from the end: root <- right <- left)
+        root.right = build(inorder, postorder, mid + 1, inR);
+        root.left  = build(inorder, postorder, inL, mid - 1);
+
+        return root;
+    }
+}
+/*
+
+#### Why right first?
+
+Postorder when read **backwards** is: `root, right, left`. After taking `root`, the next elements belong to the **right** subtree, so we must recurse right before left.
+
+---
+
+### Tiny dry run
+
+```
+inorder   = [9, 3, 15, 20, 7]
+postorder = [9, 15, 7, 20, 3]
+```
+
+* postIdx at last → root = 3. In inorder, 3 splits to left `[9]`, right `[15,20,7]`.
+* Next post element is 20’s subtree (right first), etc.
+* Final tree:
+  3
+  /&#x20;
+  9  20
+  / &#x20;
+  15   7
+
+---
+
+### Notes / Pitfalls
+
+* Assumes **all node values are unique** (standard for this problem); duplicates would break the map lookup.
+* Indices-based recursion avoids extra array copies.
+* **Time:** O(n) (each node/edge processed once)
+  **Space:** O(n) for map + recursion stack (worst-case skewed tree)
+
+If you want an **iterative stack** version as well, say the word and I’ll add it.
+
+*/
