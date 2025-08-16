@@ -166,6 +166,8 @@ public class BuildTree {
         // Step 2: Create the root node
         TreeNode root = new TreeNode(rootVal);
 
+        if(inStart==inEnd) return root;
+
         // Step 3: Get root index in inorder
         int inIndex = inorderMap.get(rootVal);
 
