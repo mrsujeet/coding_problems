@@ -1,0 +1,64 @@
+
+
+
+
+
+
+
+/*
+s:"leetcode"
+wordDict:["leet","code"]
+arr:[true,false,false,false,true,false,false,false,true]
+
+*/
+
+
+import java.util.*;
+
+class Solution {
+    public boolean wordBreak(String s, List<String> wordDict) {
+        // Put dictionary words into a HashSet for O(1) membership checks
+        Set<String> dict = new HashSet<>(wordDict);
+
+        // dp[i] == true  ⇔  the prefix s[0..i) (the FIRST i characters) can be segmented.
+        int n = s.length();
+
+        // Allocate DP table for prefixes 0..n
+        boolean[] dp = new boolean[n + 1];
+
+        // Base case: empty prefix is segmentable
+        dp[0] = true;
+
+        // Precompute the maximum word length to cap inner loop work
+        int maxLen = 0;
+
+        // Scan dictionary to find the longest word length
+        for (String w : dict) {
+            maxLen = Math.max(maxLen, w.length());
+        }
+
+        // Fill dp from left to right so smaller prefixes are ready for larger ones
+        for (int i = 1; i <= n; i++) {
+            
+          // Try every word length that could end exactly at boundary i
+            for (int len = 1; len <= maxLen && len <= i; len++) {
+                
+              // PRUNE: if the left part s[0..i-len) isn't segmentable, skip this length
+                if (!dp[i - len]) continue;
+
+                // Check the slice that ENDS at i: substring(i-len, i) is [i-len, i) (end-exclusive)
+                // If it's a word and left part was segmentable, then s[0..i) is segmentable
+                if (dict.contains(s.substring(i - len, i))) {
+                    // Mark the prefix s[0..i) as segmentable
+                    dp[i] = true;
+
+                    // No need to try more lengths for this i
+                    break;
+                }
+            }
+        }
+
+        // Answer: can we segment the whole string s[0..n)?
+        return dp[n];
+    }
+}
