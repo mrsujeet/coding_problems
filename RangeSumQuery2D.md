@@ -94,9 +94,13 @@ sumMatrix[r][c] = matrix[r-1][c-1] + sumAbove + sumToLeft - sumOfOverlap
     /**
      * Calculates the sum of the specified rectangular region in O(1) time.
      * Time Complexity: O(1)
-     <img width="1575" height="816" alt="Pasted Graphic 4" src="https://github.com/user-attachments/assets/18a3fd11-c645-4384-946b-622a6238ffbe" />
-
      */
+
+     /*
+    image:
+    <img width="1575" height="816" alt="Pasted Graphic 4" src="https://github.com/user-attachments/assets/88d989ea-9fb7-45c0-a1af-344d45066289" />
+     */
+
     public int sumRegion(int row1, int col1, int row2, int col2) {
         // Using the inclusion-exclusion principle with our pre-calculated matrix.
         // We add 1 to the indices because our sumMatrix is padded.
