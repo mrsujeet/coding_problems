@@ -66,7 +66,14 @@ class NumMatrix {
 
         // Initialize sumMatrix with an extra row and column to simplify formulas.
         sumMatrix = new int[rows + 1][cols + 1];
+/*
+The constructor's job is to build the sumMatrix. It iterates through the input matrix and calculates the value for each cell using the following formula:
 
+sumMatrix[r][c] = matrix[r-1][c-1] + sumAbove + sumToLeft - sumOfOverlap
+<img width="1677" height="769" alt="Original" src="https://github.com/user-attachments/assets/032ddcf4-e44a-4855-a23e-64fe735b177a" />
+
+
+*/
         // Build the summed-area table.
         for (int r = 1; r <= rows; r++) {
             for (int c = 1; c <= cols; c++) {
@@ -87,6 +94,8 @@ class NumMatrix {
     /**
      * Calculates the sum of the specified rectangular region in O(1) time.
      * Time Complexity: O(1)
+     <img width="1575" height="816" alt="Pasted Graphic 4" src="https://github.com/user-attachments/assets/18a3fd11-c645-4384-946b-622a6238ffbe" />
+
      */
     public int sumRegion(int row1, int col1, int row2, int col2) {
         // Using the inclusion-exclusion principle with our pre-calculated matrix.
