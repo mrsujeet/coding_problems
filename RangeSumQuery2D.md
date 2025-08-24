@@ -98,7 +98,8 @@ sumMatrix[r][c] = matrix[r-1][c-1] + sumAbove + sumToLeft - sumOfOverlap
 
      /*
     image:
-    <img width="1575" height="816" alt="Pasted Graphic 4" src="https://github.com/user-attachments/assets/88d989ea-9fb7-45c0-a1af-344d45066289" />
+  <img width="1095" height="567" alt="image" src="https://github.com/user-attachments/assets/ff51b771-35f7-4605-8958-4417aa43baf7" />
+
      */
 
     public int sumRegion(int row1, int col1, int row2, int col2) {
