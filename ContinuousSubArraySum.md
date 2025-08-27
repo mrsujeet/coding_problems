@@ -21,6 +21,14 @@ Output: true
 Explanation: [2, 4] is a continuous subarray of size 2 whose elements sum up to 6.
 
 
+How it works ?
+
+If prefixSum[i] % k == prefixSum[j] % k and i > j, then
+(prefixSum[i] - prefixSum[j]) % k == 0, i.e., the subarray (j+1..i) sum is a multiple of k. We enforce i - j >= 2.
+
+Time: O(n)
+Space: O(min(n, |k|)) for the map of remainders (O(n) worst-case)
+
 */
 
 
