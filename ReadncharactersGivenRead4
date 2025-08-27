@@ -1,0 +1,62 @@
+/*
+https://leetcode.com/problems/read-n-characters-given-read4/description/
+
+
+Given a file and assume that you can only read the file using a given method read4, implement a method to read n characters.
+
+Method read4:
+
+The API read4 reads four consecutive characters from file, then writes those characters into the buffer array buf4.
+
+The return value is the number of actual characters read.
+
+Note that read4() has its own file pointer, much like FILE *fp in C.
+
+Definition of read4:
+
+    Parameter:  char[] buf4
+    Returns:    int
+
+buf4[] is a destination, not a source. The results from read4 will be copied to buf4[].
+Below is a high-level example of how read4 works:
+
+
+File file("abcde"); // File is "abcde", initially file pointer (fp) points to 'a'
+char[] buf4 = new char[4]; // Create buffer with enough space to store characters
+read4(buf4); // read4 returns 4. Now buf4 = "abcd", fp points to 'e'
+read4(buf4); // read4 returns 1. Now buf4 = "e", fp points to end of file
+read4(buf4); // read4 returns 0. Now buf4 = "", fp points to end of file
+
+*/
+
+
+/* The read4 API is defined in the parent class Reader4.
+      int read4(char[] buf4); 
+*/
+
+public class Solution extends Reader4 {
+    /**
+     * Reads up to n characters from the file into buf[].
+     *
+     * @param buf Destination buffer (where we must store chars)
+     * @param n   Max number of characters to read
+     * @return    The number of characters actually read
+     */
+    public int read(char[] buf, int n) {
+        int total = 0;               // total chars written into buf so far
+        char[] tmp = new char[4];    // temporary buffer for read4 (max size 4)
+
+        // Keep reading until we've read n chars OR reached end of file
+        while (total < n) {
+            int count = read4(tmp);  // read up to 4 chars into tmp[]
+            if (count == 0) break;   // EOF reached (nothing more to read)
+
+            // Copy the chars from tmp[] into buf[], but don’t exceed n
+            // count <= 4 always, and total < n ensures we don’t overfill buf
+            for (int i = 0; i < count && total < n; i++) {
+                buf[total++] = tmp[i];
+            }
+        }
+        return total; // total chars successfully read
+    }
+}
