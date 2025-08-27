@@ -52,7 +52,7 @@ ass Solution {
             }
  //If an interval ends earlier, then it cannot possibly overlap with any future intervals from the other list (because the lists are sorted and disjoint).
 
-            if(firstList[i][1]<=secondList[j][1]){ 
+            if(firstList[i][1]<=secondList[j][1]){ //similar to merging two sorted array
                 i++;
             }else{
                 j++;
