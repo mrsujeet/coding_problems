@@ -1,0 +1,63 @@
+/*
+https://leetcode.com/problems/integer-to-english-words/description/
+
+Convert a non-negative integer num to its English words representation.
+
+ 
+
+Example 1:
+
+Input: num = 123
+Output: "One Hundred Twenty Three"
+Example 2:
+
+Input: num = 12345
+Output: "Twelve Thousand Three Hundred Forty Five"
+Example 3:
+
+Input: num = 1234567
+Output: "One Million Two Hundred Thirty Four Thousand Five Hundred Sixty Seven"
+ 
+
+Constraints:
+
+0 <= num <= 231 - 1
+
+*/
+
+
+private  final String[] LESS_THAN_20 = {"", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"};
+private  final String[] TENS = {"","", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"};
+private  final String[] THOUSANDS = {"", "Thousand", "Million", "Billion"};
+    public String numberToWords(int num) {
+         if (num == 0) return "Zero";
+        // Index into THOUSANDS (0: "", 1: "Thousand", 2: "Million", 3: "Billion")
+        int i=0;
+        String word="";
+        
+        // Process 3-digit chunks from least significant to most
+        while(num>0){
+            // current 3-digit block
+            int chunk= num%1000;
+            
+            if(chunk!=0){
+                word=helper(chunk)+THOUSANDS[i]+" "+word;
+            }
+            num=num/1000;
+            i++;
+        }
+       return word.trim(); 
+    }
+    
+    // Spell the 3-digit chunk (no trailing spaces)
+    String helper(int n){
+        if(n==0)
+            return "";
+        if(n<20)
+            return LESS_THAN_20[n]+" ";
+        if(n<100)
+           return TENS[n/10]+" "+helper(n%10);
+        else
+         return   LESS_THAN_20[n/100]+" Hundred "+helper(n%100);
+            
+    }
