@@ -35,6 +35,50 @@ Binary Tree – Global Max Path Sum = 42
 
 Here's how to read the visual outputs you now have:
 
+
+
+```
+    -10
+    /  \
+   9   20
+      /  \
+     15   7
+```
+
+Let’s compute gains and “path-through” values:
+
+* For leaf 9:
+
+  * leftGain = 0, rightGain = 0
+  * pathThrough(9) = **9**
+  * return gain to parent = **9**
+* For leaf 15:
+
+  * pathThrough(15) = **15**, return gain = **15**
+* For leaf 7:
+
+  * pathThrough(7) = **7**, return gain = **7**
+* For node 20:
+
+  * leftGain = max(gain(15), 0) = 15
+  * rightGain = max(gain(7), 0) = 7
+  * pathThrough(20) = **20 + 15 + 7 = 42**  ← candidate for global max
+  * return gain to parent = **20 + max(15, 7) = 35**
+* For root -10:
+
+  * leftGain = max(gain(9), 0) = 9
+  * rightGain = max(gain(20), 0) = 35
+  * pathThrough(-10) = **-10 + 9 + 35 = 34**
+  * return gain (to a non-existent parent) = **-10 + max(9, 35) = 25**
+
+Now take the **maximum** over all `pathThrough(node)`:
+
+* max = max(9, 15, 7, **42**, 34) = **42**
+
+So the optimal path is `15 → 20 → 7` with sum **42**.
+The path that **includes** `-10` (e.g., `9 → -10 → 20 → 7` or `9 → -10 → 20 → 15`) is worse because `-10` **reduces** the total, giving at best **34** through the root. That’s why the final answer excludes `-10`: not because we ignored it, but because another path (entirely in the right subtree) has a larger sum.
+
+
 1  Node‑by‑node table
 leftMax / rightMax – the best downward‑going path you can take from each child (or 0 if taking that child would hurt the total).
 
