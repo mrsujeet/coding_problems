@@ -154,6 +154,7 @@ class Solution {
                     reachCount[newR][newC]++;
                     
                     // Add the neighbor to the queue to explore from it later.
+                    //So if the current cell’s distance is dist, the neighbor’s distance is dist + 1
                     queue.offer(new int[]{newR, newC, dist + 1});
                 }
             }
