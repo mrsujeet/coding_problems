@@ -1,0 +1,112 @@
+/*
+https://leetcode.com/problems/powx-n/description/
+
+Implement pow(x, n), which calculates x raised to the power n (i.e., xn).
+
+ 
+
+Example 1:
+
+Input: x = 2.00000, n = 10
+Output: 1024.00000
+Example 2:
+
+Input: x = 2.10000, n = 3
+Output: 9.26100
+Example 3:
+
+Input: x = 2.00000, n = -2
+Output: 0.25000
+Explanation: 2-2 = 1/22 = 1/4 = 0.25
+ 
+
+Constraints:
+
+-100.0 < x < 100.0
+-231 <= n <= 231-1
+n is an integer.
+Either x is not zero or n > 0.
+-104 <= xn <= 104
+
+
+Think of the binary number as a set of instructions. For n = 10, the binary is 1010. We can read this from right to left, where each position represents a power of x.
+
+1010 corresponds to the powers: x 
+8
+ ,x 
+4
+ ,x 
+2
+ ,x 
+1
+ .
+
+The rule is simple:
+
+If a bit is 1, we include that power in our final multiplication.
+
+If a bit is 0, we skip it.
+
+For 1010:
+
+The rightmost bit is 0 (for x 
+1
+ ). Skip it.
+
+The next bit is 1 (for x 
+2
+ ). Include x 
+2
+ .
+
+The next bit is 0 (for x 
+4
+ ). Skip it.
+
+The leftmost bit is 1 (for x 
+8
+ ). Include x 
+8
+ .
+
+So, the final result is just the "included" parts multiplied together: x 
+2
+ ⋅x 
+8
+ =x 
+10
+ .
+
+
+*/
+
+
+class Solution {
+    public double myPow(double x, int n) {
+        // Use a long for the exponent to handle the Integer.MIN_VALUE case.
+        long N = n;
+
+        // If n is negative, invert x and make the exponent positive.
+        if (N < 0) {
+            x = 1 / x;
+            N = -N;
+        }
+
+        double result = 1.0;
+        double current_product = x;
+
+        // Loop until the exponent becomes 0.
+        while (N > 0) {
+            // If N is odd, multiply the result by the current product.
+            if (N % 2 == 1) {
+                result = result * current_product;
+            }
+            
+            // Square the current product and halve the exponent for the next iteration.
+            current_product = current_product * current_product;
+            N = N / 2;
+        }
+        
+        return result;
+    }
+}
