@@ -84,6 +84,7 @@ Scan from the right until you find the first `nums[i] < nums[i+1]`.
 So, `i = 1` (`nums[i] = 4`).
 
 This means everything from index 2 onward `[7,6,5,3,2]` is a **non-increasing suffix**.
+So when we scan from right to left, we are looking for the longest tail part of the array that is sorted in descending order.
 
 ---
 
