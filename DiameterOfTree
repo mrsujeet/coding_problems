@@ -80,7 +80,7 @@ public class Solution {
         maxDiameter = Math.max(maxDiameter, left + right);
 
         // Return height of current node
-        return 1 + Math.max(left, right);
+        return 1 + Math.max(left, right); //take the taller child’s height and add 1 to count the current node.
     }
 }
 
