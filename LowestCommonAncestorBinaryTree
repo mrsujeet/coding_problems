@@ -56,7 +56,7 @@ class Solution {
             return root;
         }
 
-        // Otherwise return the non-null side
+        // Otherwise return the non-null side and if both null then return null
         return (left != null) ? left : right;
     }
 }
