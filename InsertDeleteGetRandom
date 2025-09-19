@@ -40,20 +40,6 @@ There will be at least one element in the data structure when getRandom is calle
 
 
 
-import java.util.*;
-
-/**
- * RandomizedSet supports:
- *  - insert(val): O(1) amortized, returns true if inserted (not present).
- *  - remove(val): O(1) amortized, returns true if removed (present).
- *  - getRandom(): O(1), returns a uniformly random element currently in the set.
- *
- * Design:
- *  - ArrayList<Integer> list stores the elements tightly packed (no gaps).
- *  - HashMap<Integer, Integer> idx maps value -> its index in list.
- *  - For remove in O(1): swap the element to remove with the last element, update its index,
- *    then pop the last element from the list.
- */
 class RandomizedSet {
     // Maps a value to its index in 'list'
     private final Map<Integer, Integer> idx;
@@ -71,27 +57,17 @@ class RandomizedSet {
         this.random = new Random();
     }
 
-    /**
-     * Inserts val into the set if not present.
-     * @param val value to insert
-     * @return true if inserted (was not present), false otherwise
-     */
+    
     public boolean insert(int val) {
         // If already present, do nothing
         if (idx.containsKey(val)) return false;
-
         // Append to list and remember its index
         idx.put(val, list.size());
         list.add(val);
         return true;
     }
 
-    /**
-     * Removes val from the set if present.
-     * O(1) by swapping with the last element and popping.
-     * @param val value to remove
-     * @return true if removed (was present), false otherwise
-     */
+    
     public boolean remove(int val) {
         Integer i = idx.get(val);
         if (i == null) return false; // not present
@@ -113,29 +89,17 @@ class RandomizedSet {
         return true;
     }
 
-    /**
-     * Returns a uniformly random element currently in the set.
-     * @return random value from the set
-     * @throws NoSuchElementException if the set is empty
-     */
-    public int getRandom() {
-        if (list.isEmpty()) {
-            throw new NoSuchElementException("RandomizedSet is empty");
-        }
+     public int getRandom() {
+        
         int i = random.nextInt(list.size()); // random index in [0, size)
         return list.get(i);
     }
-
-    // --- Optional: tiny demo ---
-    public static void main(String[] args) {
-        RandomizedSet rs = new RandomizedSet();
-        System.out.println(rs.insert(10)); // true
-        System.out.println(rs.insert(20)); // true
-        System.out.println(rs.insert(10)); // false (duplicate)
-        System.out.println(rs.remove(30)); // false (not present)
-        System.out.println(rs.remove(10)); // true
-        System.out.println(rs.insert(30)); // true
-        // Should print either 20 or 30
-        System.out.println(rs.getRandom());
-    }
 }
+
+/**
+ * Your RandomizedSet object will be instantiated and called as such:
+ * RandomizedSet obj = new RandomizedSet();
+ * boolean param_1 = obj.insert(val);
+ * boolean param_2 = obj.remove(val);
+ * int param_3 = obj.getRandom();
+ */
