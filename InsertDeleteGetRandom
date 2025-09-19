@@ -1,0 +1,141 @@
+/*
+https://leetcode.com/problems/insert-delete-getrandom-o1/description/
+mplement the RandomizedSet class:
+
+RandomizedSet() Initializes the RandomizedSet object.
+bool insert(int val) Inserts an item val into the set if not present. Returns true if the item was not present, false otherwise.
+bool remove(int val) Removes an item val from the set if present. Returns true if the item was present, false otherwise.
+int getRandom() Returns a random element from the current set of elements (it's guaranteed that at least one element exists when this method is called). Each element must have the same probability of being returned.
+You must implement the functions of the class such that each function works in average O(1) time complexity.
+
+ 
+
+Example 1:
+
+Input
+["RandomizedSet", "insert", "remove", "insert", "getRandom", "remove", "insert", "getRandom"]
+[[], [1], [2], [2], [], [1], [2], []]
+Output
+[null, true, false, true, 2, true, false, 2]
+
+Explanation
+RandomizedSet randomizedSet = new RandomizedSet();
+randomizedSet.insert(1); // Inserts 1 to the set. Returns true as 1 was inserted successfully.
+randomizedSet.remove(2); // Returns false as 2 does not exist in the set.
+randomizedSet.insert(2); // Inserts 2 to the set, returns true. Set now contains [1,2].
+randomizedSet.getRandom(); // getRandom() should return either 1 or 2 randomly.
+randomizedSet.remove(1); // Removes 1 from the set, returns true. Set now contains [2].
+randomizedSet.insert(2); // 2 was already in the set, so return false.
+randomizedSet.getRandom(); // Since 2 is the only number in the set, getRandom() will always return 2.
+ 
+
+Constraints:
+
+-231 <= val <= 231 - 1
+At most 2 * 105 calls will be made to insert, remove, and getRandom.
+There will be at least one element in the data structure when getRandom is called.
+
+
+*/
+
+
+
+import java.util.*;
+
+/**
+ * RandomizedSet supports:
+ *  - insert(val): O(1) amortized, returns true if inserted (not present).
+ *  - remove(val): O(1) amortized, returns true if removed (present).
+ *  - getRandom(): O(1), returns a uniformly random element currently in the set.
+ *
+ * Design:
+ *  - ArrayList<Integer> list stores the elements tightly packed (no gaps).
+ *  - HashMap<Integer, Integer> idx maps value -> its index in list.
+ *  - For remove in O(1): swap the element to remove with the last element, update its index,
+ *    then pop the last element from the list.
+ */
+class RandomizedSet {
+    // Maps a value to its index in 'list'
+    private final Map<Integer, Integer> idx;
+
+    // Stores the values; order doesn’t matter, but must be dense for O(1) access by index
+    private final List<Integer> list;
+
+    // Random number generator for getRandom()
+    private final Random random;
+
+    /** Initialize data structures. */
+    public RandomizedSet() {
+        this.idx = new HashMap<>();
+        this.list = new ArrayList<>();
+        this.random = new Random();
+    }
+
+    /**
+     * Inserts val into the set if not present.
+     * @param val value to insert
+     * @return true if inserted (was not present), false otherwise
+     */
+    public boolean insert(int val) {
+        // If already present, do nothing
+        if (idx.containsKey(val)) return false;
+
+        // Append to list and remember its index
+        idx.put(val, list.size());
+        list.add(val);
+        return true;
+    }
+
+    /**
+     * Removes val from the set if present.
+     * O(1) by swapping with the last element and popping.
+     * @param val value to remove
+     * @return true if removed (was present), false otherwise
+     */
+    public boolean remove(int val) {
+        Integer i = idx.get(val);
+        if (i == null) return false; // not present
+
+        int lastIdx = list.size() - 1;
+        int lastVal = list.get(lastIdx);
+
+        // Move the last element into the slot of the element to be removed
+        // (Safe even if i == lastIdx; it becomes a no-op.)
+        list.set(i, lastVal);
+        idx.put(lastVal, i);
+
+        // Remove the last element (now duplicated at position i)
+        list.remove(lastIdx);
+
+        // Erase the removed value's index mapping
+        idx.remove(val);
+
+        return true;
+    }
+
+    /**
+     * Returns a uniformly random element currently in the set.
+     * @return random value from the set
+     * @throws NoSuchElementException if the set is empty
+     */
+    public int getRandom() {
+        if (list.isEmpty()) {
+            throw new NoSuchElementException("RandomizedSet is empty");
+        }
+        int i = random.nextInt(list.size()); // random index in [0, size)
+        return list.get(i);
+    }
+
+    // --- Optional: tiny demo ---
+    public static void main(String[] args) {
+        RandomizedSet rs = new RandomizedSet();
+        System.out.println(rs.insert(10)); // true
+        System.out.println(rs.insert(20)); // true
+        System.out.println(rs.insert(10)); // false (duplicate)
+        System.out.println(rs.remove(30)); // false (not present)
+        System.out.println(rs.remove(10)); // true
+        System.out.println(rs.insert(30)); // true
+        // Should print either 20 or 30
+        System.out.println(rs.getRandom());
+    }
+}
