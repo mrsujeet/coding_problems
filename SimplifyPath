@@ -1,0 +1,105 @@
+/*
+https://leetcode.com/problems/simplify-path/submissions/1777504326/
+
+You are given an absolute path for a Unix-style file system, which always begins with a slash '/'. Your task is to transform this absolute path into its simplified canonical path.
+
+The rules of a Unix-style file system are as follows:
+
+A single period '.' represents the current directory.
+A double period '..' represents the previous/parent directory.
+Multiple consecutive slashes such as '//' and '///' are treated as a single slash '/'.
+Any sequence of periods that does not match the rules above should be treated as a valid directory or file name. For example, '...' and '....' are valid directory or file names.
+The simplified canonical path should follow these rules:
+
+The path must start with a single slash '/'.
+Directories within the path must be separated by exactly one slash '/'.
+The path must not end with a slash '/', unless it is the root directory.
+The path must not have any single or double periods ('.' and '..') used to denote current or parent directories.
+Return the simplified canonical path.
+
+ 
+
+Example 1:
+
+Input: path = "/home/"
+
+Output: "/home"
+
+Explanation:
+
+The trailing slash should be removed.
+
+Example 2:
+
+Input: path = "/home//foo/"
+
+Output: "/home/foo"
+
+Explanation:
+
+Multiple consecutive slashes are replaced by a single one.
+
+Example 3:
+
+Input: path = "/home/user/Documents/../Pictures"
+
+Output: "/home/user/Pictures"
+
+Explanation:
+
+A double period ".." refers to the directory up a level (the parent directory).
+
+
+
+
+
+
+Deque<String> stack = new ArrayDeque<>();
+
+What it is:
+
+Deque<E> is a double-ended queue interface in Java—lets you add/remove at both ends.
+
+ArrayDeque<E> is a resizable-array implementation of Deque.
+
+With String as the type parameter, this creates a Deque that holds strings.
+
+Why use it as a “stack”:
+Deque has stack-like methods: push(e), pop(), peek().
+Using these gives classic LIFO behavior (last-in, first-out), which is exactly what we want for simplifying paths (push directory names, pop on ..).
+
+Why ArrayDeque (and not Stack or LinkedList):
+
+Stack<E> is a legacy, synchronized class; generally slower and discouraged for new code.
+
+ArrayDeque<E> is typically faster than both Stack and LinkedList for stack usage.
+
+LinkedList<E> works but has node allocation overhead; ArrayDeque uses a contiguous array.
+
+*/
+
+import java.util.Deque;
+import java.util.LinkedList;
+
+public class PathSimplifier {
+    /**
+     * Use Deque as a stack:
+     * - push dirs to BACK (offerLast), pop BACK on ".." (pollLast)
+     * - iterate FRONT→BACK to get left→right path (no reverse needed)
+     */
+    public String simplifyPath(String path) {
+        Deque<String> stack = new LinkedList<>();
+
+        for (String part : path.split("/")) {
+            if (part.isEmpty() || part.equals(".")) continue;
+            if (part.equals("..")) { if (!stack.isEmpty()) stack.pollLast(); }
+            else stack.offerLast(part);
+        }
+
+        if (stack.isEmpty()) return "/";
+
+        StringBuilder sb = new StringBuilder();
+        for (String dir : stack) sb.append('/').append(dir);
+        return sb.toString();
+    }
+}
