@@ -1,0 +1,106 @@
+/*
+
+https://leetcode.com/problems/find-root-of-n-ary-tree/
+
+
+You are given all the nodes of an N-ary tree as an array of Node objects, where each node has a unique value.
+
+Return the root of the N-ary tree.
+
+Custom testing:
+
+An N-ary tree can be serialized as represented in its level order traversal where each group of children is separated by the null value (see examples).
+
+
+*/
+
+
+import java.util.*;
+
+/*
+// Definition for a Node.
+class Node {
+    public int val;
+    public List<Node> children;
+    public Node() { this.children = new ArrayList<>(); }
+    public Node(int _val) { val = _val; this.children = new ArrayList<>(); }
+    public Node(int _val, List<Node> _children) { val = _val; children = _children; }
+}
+*/
+
+class Solution {
+
+    /**
+     * Default entry used by LeetCode. We choose the XOR method because it is
+     * O(n) time and O(1) extra space, and values are guaranteed unique.
+     */
+    public Node findRoot(List<Node> tree) {
+        return findRootXor(tree);
+    }
+
+    /**
+     * METHOD 1: XOR of node values and child values.
+     *
+     * Idea:
+     *  - Every node's value appears exactly once among "nodes".
+     *  - Every non-root node's value also appears once among "children".
+     *  - XOR all node values and XOR all children values; pairs cancel (x ^ x = 0).
+     *  - The only value left is the root's value; scan once more to return that node.
+     *
+     * Complexity:
+     *  - Time:  O(n + m) where m is total number of edges (overall linear).
+     *  - Space: O(1) extra.
+     */
+    public Node findRootXor(List<Node> tree) {
+        if (tree == null || tree.isEmpty()) return null;
+
+        int acc = 0;
+
+        // XOR all node values and their children values
+        for (Node node : tree) {
+            acc ^= node.val;                 // include this node
+            for (Node child : node.children) {
+                acc ^= child.val;            // cancel non-root nodes when combined with node pass above
+            }
+        }
+
+        // 'acc' is now the root node's value; return the matching node
+        for (Node node : tree) {
+            if (node.val == acc) return node;
+        }
+        return null; // should not happen if input is a valid tree
+    }
+
+    /**
+     * METHOD 2: Mark-all-children using a HashSet.
+     *
+     * Idea:
+     *  - Insert all child Node references into a set.
+     *  - The only node not present in the set is the root.
+     *
+     * Complexity:
+     *  - Time:  O(n + m) overall linear.
+     *  - Space: O(n) for the set of child references.
+     */
+    public Node findRootMarkChildren(List<Node> tree) {
+        if (tree == null || tree.isEmpty()) return null;
+
+        // Keep references to all nodes that ever appear as children
+        Set<Node> seenAsChild = new HashSet<>();
+
+        for (Node node : tree) {
+            for (Node child : node.children) {
+                seenAsChild.add(child);
+            }
+        }
+
+        // The root is the only node never seen as a child
+        for (Node node : tree) {
+            if (!seenAsChild.contains(node)) {
+                return node;
+            }
+        }
+
+        return null; // should not happen if input is a valid tree
+    }
+}
