@@ -1,0 +1,95 @@
+/*
+https://leetcode.com/problems/basic-calculator-ii/description/
+
+Given a string s which represents an expression, evaluate this expression and return its value. 
+
+The integer division should truncate toward zero.
+
+You may assume that the given expression is always valid. All intermediate results will be in the range of [-231, 231 - 1].
+
+Note: You are not allowed to use any built-in function which evaluates strings as mathematical expressions, such as eval().
+
+ 
+
+Example 1:
+
+Input: s = "3+2*2"
+Output: 7
+Example 2:
+
+Input: s = " 3/2 "
+Output: 1
+Example 3:
+
+Input: s = " 3+5 / 2 "
+Output: 5
+ 
+
+Constraints:
+
+1 <= s.length <= 3 * 105
+s consists of integers and operators ('+', '-', '*', '/') separated by some number of spaces.
+s represents a valid expression.
+All the integers in the expression are non-negative integers in the range [0, 231 - 1].
+The answer is guaranteed to fit in a 32-bit integer.
+
+
+*/
+
+/**
+ * Evaluates a basic arithmetic expression containing +, -, *, / and spaces.
+ * Integer division truncates toward zero. Expression is guaranteed valid.
+ */
+public int calculate(String s) {
+    long res = 0,    // running total of fully "flushed" terms
+         curr = 0,   // number currently being parsed (accumulates digits)
+         last = 0;   // the last term not yet flushed to res (subject to * or /)
+    char op = '+';   // operator that should be applied to `curr` with respect to `last/res`
+    int n = s.length();
+
+    for (int i = 0; i < n; i++) {
+        char c = s.charAt(i);
+
+        // Build the current number if we see a digit (handles multi-digit)
+        if (Character.isDigit(c)) {
+            curr = curr * 10 + (c - '0');
+        }
+
+        // When we hit a non-space, non-digit (an operator) OR the last char,
+        // we "commit" the previous operator to fold `curr` into `last/res`.
+        if ((!Character.isDigit(c) && c != ' ') || i == n - 1) {
+            switch (op) {
+                case '+':
+                    // Flush the previous `last` into `res`, start a new positive term
+                    res += last;
+                    last = curr;
+                    break;
+                case '-':
+                    // Flush the previous `last`, start a new negative term
+                    res += last;
+                    last = -curr;
+                    break;
+                case '*':
+                    // Fold multiplication into the pending term
+                    last = last * curr;
+                    break;
+                case '/':
+                    // Integer division in Java truncates toward zero
+                    last = last / curr;
+                    break;
+            }
+            // Update the operator for the next number and reset `curr`
+            op = c;
+            curr = 0;
+        }
+    }
+
+    // Flush the final pending term
+    res += last;
+
+    // Problem guarantees 32-bit range; cast is safe.
+    return (int) res;
+}
+
+
+
