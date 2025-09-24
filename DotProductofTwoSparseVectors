@@ -1,0 +1,149 @@
+/*
+
+https://leetcode.com/problems/dot-product-of-two-sparse-vectors/description/
+
+Given two sparse vectors, compute their dot product.
+
+Implement class SparseVector:
+
+SparseVector(nums) Initializes the object with the vector nums
+dotProduct(vec) Compute the dot product between the instance of SparseVector and vec
+A sparse vector is a vector that has mostly zero values, you should store the sparse vector efficiently and compute the dot product between two SparseVector.
+
+Follow up: What if only one of the vectors is sparse?
+
+ 
+
+Example 1:
+
+Input: nums1 = [1,0,0,2,3], nums2 = [0,3,0,4,0]
+Output: 8
+Explanation: v1 = SparseVector(nums1) , v2 = SparseVector(nums2)
+v1.dotProduct(v2) = 1*0 + 0*3 + 0*0 + 2*4 + 3*0 = 8
+Example 2:
+
+Input: nums1 = [0,1,0,0,0], nums2 = [0,0,0,0,2]
+Output: 0
+Explanation: v1 = SparseVector(nums1) , v2 = SparseVector(nums2)
+v1.dotProduct(v2) = 0*0 + 1*0 + 0*0 + 0*0 + 0*2 = 0
+Example 3:
+
+Input: nums1 = [0,1,0,0,2,0,0], nums2 = [1,0,0,0,3,0,4]
+Output: 6
+ 
+
+Constraints:
+
+n == nums1.length == nums2.length
+1 <= n <= 10^5
+0 <= nums1[i], nums2[i] <= 100
+
+
+*/
+
+import java.util.*;
+
+/**
+ * Clarification:
+ * - "Sparse" vs "Dense" can mean TWO things:
+ *   (1) The data itself (contents): sparse data has many zeros.
+ *   (2) The representation in code: sparse representation stores only (index, value) for non-zeros,
+ *       while dense representation stores every element in a plain array.
+ *
+ * In the follow-up method below, we say "one sparse, one dense" to mean:
+ *   - The "sparse" side is a SparseVector object (compressed representation).
+ *   - The "dense" side is a raw int[] array (full representation), even if it ALSO contains many zeros.
+ *
+ * So we're naming them by HOW we store them, not by HOW MANY zeros they have.
+ */
+class SparseVector {
+    // indices and values of non-zero entries (sorted by index)
+    private final int[] idx;
+    private final int[] val;
+
+    // original logical length; useful for validation against dense arrays
+    private final int n;
+
+    public SparseVector(int[] nums) {
+        this.n = nums.length;
+
+        // Count non-zeros to size compact arrays
+        int k = 0;
+        for (int x : nums) if (x != 0) k++;
+
+        idx = new int[k];
+        val = new int[k];
+
+        // Fill compact (index, value) arrays
+        int p = 0;
+        for (int i = 0; i < nums.length; i++) {
+            int x = nums[i];
+            if (x != 0) {
+                idx[p] = i;
+                val[p] = x;
+                p++;
+            }
+        }
+        // After construction, idx is strictly increasing; val aligns with idx by position.
+    }
+
+    /**
+     * Dot product with another *sparse-represented* vector.
+     * We merge the two sorted (index,value) lists using a two-pointer scan.
+     * Time: O(k1 + k2) where k1, k2 are non-zero counts of the two vectors.
+     */
+    public int dotProduct(SparseVector other) {
+        if (this.n != other.n) {
+            throw new IllegalArgumentException("Vectors must have the same length.");
+        }
+        int i = 0, j = 0, res = 0;
+        while (i < this.idx.length && j < other.idx.length) {
+            int a = this.idx[i], b = other.idx[j];
+            if (a == b) {
+                res += this.val[i] * other.val[j]; // indices match → contributes to dot product
+                i++; j++;
+            } else if (a < b) {
+                i++; // advance the smaller index to try to catch up
+            } else {
+                j++;
+            }
+        }
+        return res;
+    }
+
+    /**
+     * Follow-up: dot product when *only one side* uses a sparse representation.
+     *
+     * Here, "dense" means a plain array int[] (full storage), not "few zeros".
+     * We iterate ONLY the non-zeros of this SparseVector and index into the dense array.
+     * This costs O(k_sparse) time, ignoring zeros on the dense side automatically.
+     */
+    public int dotWithDense(int[] dense) {
+        if (dense.length != n) {
+            throw new IllegalArgumentException("Vectors must have the same length.");
+        }
+        int res = 0;
+        for (int k = 0; k < idx.length; k++) {
+            int i = idx[k];     // non-zero index in this sparse vector
+            int v = val[k];     // non-zero value at that index
+            res += v * dense[i]; // multiply by the dense vector's element at the same index
+        }
+        return res;
+    }
+
+    // Convenience: original logical length
+    public int length() { return n; }
+}
+
+/** Demo with comments explaining "sparse vs dense" naming in usage. */
+public class Main {
+    public static void main(String[] args) {
+        // Example 1 (both sparse by *representation*):
+        int[] nums1 = {1, 0, 0, 2, 3};
+        int[] nums2 = {0, 3, 0, 4, 0};
+        SparseVector v1 = new SparseVector(nums1); // compressed form → "sparse" representation
+        SparseVector v2 = new SparseVector(nums2); // compressed form → "sparse" representation
+        System.out.println(v1.dotProduct(v2)); // 8
+
+    }
+}
