@@ -81,6 +81,36 @@ Add c → win[c] = 1
 Add b → win[b] = 1
 
 Add a → win[a] = 1
+
+
+
+Now the loop:
+m=p.length()
+for (int j = m; j < s.length(); j++) {
+    carrS[s.charAt(j - m) - 'a']--; // drop left char of previous window
+    carrS[s.charAt(j) - 'a']++;     // add new right char
+    if (Arrays.equals(carrP, carrS)) {
+        list.add(j - m + 1);        // start index of current window
+    }
+}
+
+Step-by-step window slides
+j	Remove index (j-m)	Remove char	Add index j	Add char	New window [j-m+1..j]	Window text	Equal to p?	If yes, add
+3	0	c	3	e	[1..3]	"bae"	No	–
+4	1	b	4	b	[2..4]	"aeb"	No	–
+5	2	a	5	a	[3..5]	"eba"	No	–
+6	3	e	6	b	[4..6]	"bab"	No	–
+7	4	b	7	a	[5..7]	"aba"	No	–
+8	5	a	8	c	[6..8]	"bac"	Yes	6
+9	6	b	9	d	[7..9]	"acd"	No	–
+
+The formula j - m picks the left character leaving the old window.
+
+The formula j - m + 1 is the start index of the new window after sliding.
+
+Each step adjusts carrS in O(1) (one decrement, one increment), then compares to carrP.
+
+Matches occur at starts 0 (initial check) and 6 (from the loop), giving [0, 6].
 */
         int[]carrP =new int[26]; // To maintain all chars frequency in P
         int[]carrS=new int[26]; // To maintain all chars frequency in a window of p length in strin s
