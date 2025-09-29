@@ -34,7 +34,37 @@ s and p consist of lowercase English letters.
 | Flexibility      | ❌ Only lowercase letters  | ✅ Adaptable              |
 | Simplicity       | ✅ Clean and short         | ❌ More logic complexity  |
 
+Build need from p
 
+need after processing "abc":
+
+a:1, b:1, c:1, others:0
+
+
+We slide a fixed-size window of length 3 over s, maintaining counts in win:
+
+Window [0..2] → "cba"
+
+Add c → win[c] = 1
+
+Add b → win[b] = 1
+
+Add a → win[a] = 1
+Compare win vs need: match → record start index 0
+
+Slide to [1..3] → "bae"
+
+Remove left c (leaving the window): win[c] goes 1 → 0
+
+Add right e: win[e] goes 0 → 1
+Now win:
+
+a:1, b:1, c:0, e:1
+
+
+Not equal to need (we have an extra e and missing a c) → no record
+
+and so on ....
 
 */
 
@@ -42,7 +72,16 @@ s and p consist of lowercase English letters.
  public List<Integer> findAnagrams(String s, String p) {
         List<Integer> list=new ArrayList<>();
          if (s.length() < p.length()) return list;
+/*
 
+Window [0..2] → "cba"
+
+Add c → win[c] = 1
+
+Add b → win[b] = 1
+
+Add a → win[a] = 1
+*/
         int[]carrP =new int[26]; // To maintain all chars frequency in P
         int[]carrS=new int[26]; // To maintain all chars frequency in a window of p length in strin s
 
