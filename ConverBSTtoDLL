@@ -33,6 +33,87 @@ The number of nodes in the tree is in the range [0, 2000].
 -1000 <= Node.val <= 1000
 All the values of the tree are unique.
 
+Use an in-order traversal to visit nodes in sorted order and “stitch” them into a circular doubly-linked list on the fly.
+
+Idea
+
+Maintain two pointers:
+
+first = head (smallest node seen so far)
+
+prev = previously visited node in in-order
+
+For each visited node cur:
+
+Link prev.right = cur and cur.left = prev.
+
+If prev == null, this is the first node → set first = cur.
+
+Update prev = cur.
+
+After traversal, close the circle:
+
+first.left = prev and prev.right = first.
+
+Time: O(n), Space: O(h) recursion stack (h = tree height).
+(You can do Morris traversal for O(1) extra space if required.)
+
+Visual walkthrough with an example
+
+Consider this BST:
+
+        4
+      /   \
+     2     5
+    / \
+   1   3
+
+In-order order
+
+1, 2, 3, 4, 5 (sorted)
+
+What inorder(root) does (the stitching)
+
+We keep two references:
+
+first = null at start (will become 1)
+
+prev = null at start (tracks the previous node in in-order)
+
+We visit nodes in in-order and link prev <-> curr each time.
+
+Step	Visit curr	Action	Resulting links	first	prev
+1	1	prev is null → set first = 1	(none yet)	1	1
+2	2	link prev.right = 2, 2.left = prev (1)	1 ⇄ 2	1	2
+3	3	link 2.right = 3, 3.left = 2	1 ⇄ 2 ⇄ 3	1	3
+4	4	link 3.right = 4, 4.left = 3	1 ⇄ 2 ⇄ 3 ⇄ 4	1	4
+5	5	link 4.right = 5, 5.left = 4	1 ⇄ 2 ⇄ 3 ⇄ 4 ⇄ 5	1	5
+
+Now we have a linear doubly-linked list (head first = 1, tail prev = 5):
+
+1 ⇄ 2 ⇄ 3 ⇄ 4 ⇄ 5
+^                 ^
+|                 |
+first             prev
+
+Closing the circle (your two lines)
+first.left = prev;   // 1.left = 5
+prev.right = first;  // 5.right = 1
+
+
+Now it’s circular:
+
+... ⇄ 5 ⇄ 1 ⇄ 2 ⇄ 3 ⇄ 4 ⇄ 5 ⇄ 1 ⇄ ...
+          ↑                       ↑
+        first                   prev
+
+
+The predecessor of 1 is 5.
+
+The successor of 5 is 1.
+
+That’s exactly the required circular doubly list.
+
 */
 
 // approach 1: recursive way
