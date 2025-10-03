@@ -67,6 +67,18 @@ class RandomizedSet {
         return true;
     }
 
+/*
+pos.put(val, arr.size()); // <-- why size?
+arr.add(val);             // append at the end
+Because ArrayList is 0-indexed, the element you append will land at index equal to the current size before the append.
+
+If arr.size() is 0 → the first append goes to index 0.
+
+If arr.size() is 5 → the next append goes to index 5 (valid indices are 0..4 before appending).
+
+So arr.size() is exactly the index where the new value will live once we call arr.add(val). We store that index in pos so later operations (remove/getRandom bookkeeping) know where the element is.
+
+*/
     
     public boolean remove(int val) {
         Integer i = idx.get(val);
