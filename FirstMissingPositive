@@ -43,7 +43,7 @@ class Solution {
     public int firstMissingPositive(int[] nums) {
         int n = nums.length;
 
-        // Step 1: Cyclic Sort / In-place Hashing
+   
         // The goal is to place each positive number 'x' at index 'x-1'
         // For example, if nums contains '3', we try to put it at index '2'.
         int i = 0;
