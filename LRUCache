@@ -32,75 +32,84 @@ lRUCache.get(1);    // return -1 (not found)
 lRUCache.get(3);    // return 3
 lRUCache.get(4);    // return 4
 
+Note:
+What final means here
+
+final on a reference (object/array) ⇒ you can’t reassign the reference, but you can mutate the object it points to.
+
+final on a primitive ⇒ the value can’t change.
+
 */
 
 
 class LRUCache {
-    int capacity;
+    private final int capacity;
+    private final Map<Integer, Node> cache = new HashMap<>();
+    private final Node head = new Node(-1, -1); // dummy head
+    private final Node tail = new Node(-1, -1); // dummy tail
 
-    class Node {
-        int key;
-        int value;
+    private static class Node {
+        int key, value;
         Node prev, next;
-
-        Node(int key, int value) {
-            this.key = key;
-            this.value = value;
-        }
+        Node(int k, int v) { key = k; value = v; }
     }
 
-    Map<Integer, Node> cache;
-    Node head, tail;
-
     public LRUCache(int capacity) {
+        if (capacity <= 0) throw new IllegalArgumentException("capacity must be > 0");
         this.capacity = capacity;
-        cache = new HashMap<>();
-        head = new Node(0, 0);
-        tail = new Node(0, 0);
         head.next = tail;
         tail.prev = head;
     }
 
     public int get(int key) {
-        if (!cache.containsKey(key)) return -1;
         Node node = cache.get(key);
-        moveToFront(node); // update recent usage
+        if (node == null) return -1;
+        moveToFront(node);
         return node.value;
     }
 
     public void put(int key, int value) {
-        if (cache.containsKey(key)) {
-            Node node = cache.get(key);
+        Node node = cache.get(key);
+        if (node != null) {
             node.value = value;
             moveToFront(node);
-        } else {
-            if (cache.size() == capacity) {
-                Node lru = tail.prev;
-                removeFromList(lru);
-                cache.remove(lru.key);
-            }
-            Node node = new Node(key, value);
-            cache.put(key, node);
-            addFirst(node);
+            return;
+        }
+
+        Node fresh = new Node(key, value);
+        cache.put(key, fresh);
+        addFirst(fresh);
+
+        if (cache.size() > capacity) {      // evict AFTER insert
+            Node lru = popTail();
+            cache.remove(lru.key);
         }
     }
 
-    // Utilities
-    private void moveToFront(Node node) {
-        removeFromList(node);
-        addFirst(node);
+    // ---- list helpers ----
+    private void moveToFront(Node n) {
+        remove(n);
+        addFirst(n);
     }
 
-    private void removeFromList(Node node) {
-        node.prev.next = node.next;
-        node.next.prev = node.prev;
+    private void addFirst(Node n) {
+        n.prev = head;
+        n.next = head.next;
+        head.next.prev = n;
+        head.next = n;
     }
 
-    private void addFirst(Node node) {
-        Node next = head.next;
-        head.next = node;
-        node.prev = head;
-        node.next = next;
-        next.prev = node;
+    private void remove(Node n) {
+        n.prev.next = n.next;
+        n.next.prev = n.prev;
+        // optional: help GC
+        n.prev = n.next = null;
+    }
+
+    // remove and return the least-recently-used node (before dummy tail)
+    private Node popTail() {
+        Node lru = tail.prev;
+        remove(lru);
+        return lru;
     }
 }
