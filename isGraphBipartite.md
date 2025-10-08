@@ -41,65 +41,63 @@ If graph[u] contains v, then graph[v] contains u.
 <img width="773" height="574" alt="image" src="https://github.com/user-attachments/assets/44307399-e3d7-4e9a-baa4-610b56a2205c" />
 
 
+ The input looks like a “2-D array,” but it’s **not an adjacency matrix**—it’s an **adjacency list encoded as array-of-arrays**:
+
+* **Adjacency list idea:** for each node `u`, store a list of its actual neighbors.
+* **What you’re given:** `int[][] graph` where **`graph[u]` is exactly that neighbor list**. Its length equals the degree of `u`, not `n`.
+
+### Example A (your Example 2)
+
+```
+graph = [
+  [1,3],   // neighbors of 0 → edges: (0,1), (0,3)
+  [0,2],   // neighbors of 1 → edges: (1,0), (1,2)
+  [1,3],   // neighbors of 2 → edges: (2,1), (2,3)
+  [0,2]    // neighbors of 3 → edges: (3,0), (3,2)
+]
+```
+
+Same edges (undirected ⇒ symmetric lists):
+{ (0,1), (0,3), (1,2), (2,3) }.
+
+How you iterate neighbors of `u`:
+
+```java
+for (int v : graph[u]) {
+    // v is a neighbor of u
+}
+```
+
+
 */
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 class Solution {
-    /**
-     * Determines if an undirected graph is bipartite using a two-coloring BFS approach.
-     *
-     * @param graph An adjacency list representation of the graph.
-     * @return True if the graph is bipartite, False otherwise.
-     */
     public boolean isBipartite(int[][] graph) {
         int n = graph.length;
-        // 0: uncolored, 1: color A, -1: color B
-        int[] colors = new int[n]; 
+        int[] color = new int[n]; // 0 = uncolored, +1 and -1 are the two colors
 
-        // This outer loop is necessary for graphs that may be disconnected.
-        for (int i = 0; i < n; i++) {
-            // If the node is already colored, its component has been visited.
-            if (colors[i] != 0) {
-                continue;
-            }
+        for (int s = 0; s < n; s++) {
+            if (color[s] != 0) continue;         // already explored component
+            color[s] = 1;
+            Deque<Integer> q = new ArrayDeque<>();
+            q.add(s);
 
-            // Start BFS for this uncolored component.
-            Queue<Integer> queue = new LinkedList<>();
-            queue.add(i);
-            colors[i] = 1; // Start by coloring the first node with color 1.
-
-            while (!queue.isEmpty()) {
-                int u = queue.poll();
-
-                // Check all neighbors of the current node.
-                for (int v : graph[u]) {
-                    if (colors[v] == 0) {
-                        // If the neighbor is uncolored, assign the opposite color.
-                        colors[v] = -colors[u];
-                        queue.add(v);
-                    } else if (colors[v] == colors[u]) {
-                        // If the neighbor has the same color, a conflict is found.
-                        return false; 
+            while (!q.isEmpty()) {
+                int u = q.poll();
+                for (int v : graph[u]) {          // iterate actual neighbors of u
+                    if (color[v] == 0) {
+                        color[v] = -color[u];     // opposite color
+                        q.add(v);
+                    } else if (color[v] == color[u]) {
+                        return false;             // edge connects same color → not bipartite
                     }
                 }
             }
         }
-
-        // If the loops complete without any conflicts, the graph is bipartite.
         return true;
     }
-
-    public static void main(String[] args) {
-        Solution sol = new Solution();
-
-        // Example 1: A bipartite graph (a square)
-        int[][] graph1 = {{1, 3}, {0, 2}, {1, 3}, {0, 2}};
-        System.out.println("Graph 1 is bipartite: " + sol.isBipartite(graph1)); // Output: true
-
-        // Example 2: A non-bipartite graph (a triangle)
-        int[][] graph2 = {{1, 2}, {0, 2}, {0, 1}};
-        System.out.println("Graph 2 is bipartite: " + sol.isBipartite(graph2)); // Output: false
-    }
 }
+}
+
