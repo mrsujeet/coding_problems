@@ -38,6 +38,9 @@ graph[u] does not contain u.
 All the values of graph[u] are unique.
 If graph[u] contains v, then graph[v] contains u.
 
+<img width="773" height="574" alt="image" src="https://github.com/user-attachments/assets/44307399-e3d7-4e9a-baa4-610b56a2205c" />
+
+
 */
 
 import java.util.LinkedList;
