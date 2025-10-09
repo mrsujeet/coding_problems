@@ -30,6 +30,25 @@ s consists of English letters, digits, symbols and spaces.
 
 */
 
+/*
+Tiny examples
+
+"abba"
+
+at right=2 (second 'b'), p=1 and left=0.
+
+left = p + 1 = 2 → window becomes s[2..2] = "b" (no dup).
+
+If you used left = p, window would be "bb" → still a duplicate.
+
+"abcabcbb"
+
+at right=3 (second 'a'), p=0 and left=0.
+
+left = 0 + 1 = 1 → drops the old 'a', keeps window maximal and valid.
+
+*/
+
 public int lengthOfLongestSubstring(String s) {
         int start=0;
         int maxlen=0;
