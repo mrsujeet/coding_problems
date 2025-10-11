@@ -104,7 +104,61 @@ So, there are **3 ways to decode "226"**.
 
 
 */
+/*
+Here’s a simple way to explain it:
 
+What dp[i] means:
+“dp[i] is the number of ways to decode the first i characters of the string.”
+
+How we build dp[i]:
+At position i (looking at the i-th char, 1-based in dp), there are only two ways the last part of the decoding could end:
+
+Use the last 1 digit alone
+
+This is allowed only if the current char isn’t '0' (because '0' alone is invalid).
+
+If allowed, we can append this 1-digit letter to any decoding of the first i-1 chars → add dp[i-1].
+
+if (c1 != '0') dp[i] += dp[i - 1];
+
+
+Use the last 2 digits together
+
+Look at the pair formed by the previous char and the current char: 10..26.
+
+If the two-digit number is between 10 and 26, that pair maps to a letter, so we can append it to any decoding of the first i-2 chars → add dp[i-2].
+
+int two = (c0 - '0') * 10 + (c1 - '0');
+if (two >= 10 && two <= 26) dp[i] += dp[i - 2];
+
+
+That’s it: dp[i] = (valid 1-digit ? dp[i-1] : 0) + (valid 2-digit ? dp[i-2] : 0).
+
+Tiny example: "226"
+
+Index the string as 1..n for dp.
+
+dp[0] = 1 (empty string has 1 way), dp[1] = 1 (since '2' is valid).
+
+i = 2, look at "22":
+
+1-digit ('2') valid → add dp[1] = 1
+
+2-digit ("22") valid → add dp[0] = 1
+→ dp[2] = 2 (e.g., "2|2" = BB, "22" = V)
+
+i = 3, look at "226":
+
+1-digit ('6') valid → add dp[2] = 2
+
+2-digit ("26") valid → add dp[1] = 1
+→ dp[3] = 3 (e.g., B B F, V F, B Z)
+
+How to say it in one line
+
+“At each position, the number of decodes equals the ways without the last char (if that char can stand alone) plus the ways without the last two chars (if those two form 10–26). Zeros can’t stand alone, but 10 and 20 are allowed as a pair.”
+
+*/
 
 public int numDecodings(String s) {
     if (s == null || s.length() == 0) return 0;
