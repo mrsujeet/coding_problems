@@ -34,7 +34,9 @@ public class GameOfLife {
         int rows = board.length;
         int cols = board[0].length;
 
-        // Directions for 8 neighbors (horizontal, vertical, diagonal)
+      // Directions for 8 neighbors (horizontal, vertical, diagonal)
+     //directions should not include the cell itself {0,0} (shouldn’t count itself).
+    
         int[][] directions = {
             {-1, -1}, {-1, 0}, {-1, 1},
             {0, -1},          {0, 1},
@@ -52,6 +54,9 @@ public class GameOfLife {
                     int nr = r + dir[0];
                     int nc = c + dir[1];
                     if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                    //When counting neighbors, we must count cells that were alive in the previous generation, 
+                    //regardless of what they’re about to become. Those are exactly the cells whose old value was live:
+                    //that is why Math.abs(board[r][c])Previously alive ⇒ values are 1 or -1
                         if (Math.abs(board[nr][nc]) == 1) {
                             liveNeighbors++;
                         }
