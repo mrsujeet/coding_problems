@@ -49,6 +49,129 @@ Constraints:
 At most 105 calls will be made in total to update, current, maximum, and minimum.
 current, maximum, and minimum will be called only after update has been called at least once.
 
+---
+
+## 🧩 What we’re maintaining
+
+We maintain a **TreeMap<Integer, Integer> priceCount**,
+where each entry looks like:
+
+```
+price → number of timestamps that currently have this price
+```
+
+Example:
+
+```java
+priceCount = {5=1, 7=2, 10=1}
+```
+
+This means:
+
+* Price **5** appears at **1 timestamp**
+* Price **7** appears at **2 timestamps**
+* Price **10** appears at **1 timestamp**
+
+---
+
+## 💡 Why do we store *counts* instead of just storing prices?
+
+Because **the same price can occur at multiple timestamps**.
+
+Let’s say:
+
+```
+update(1, 5)
+update(2, 5)
+update(3, 10)
+```
+
+Now both timestamps 1 and 2 have price `5`.
+If we only stored unique prices (like in a `TreeSet`), we’d know that 5 exists —
+but when one timestamp’s price changes, we wouldn’t know whether to **delete 5 completely** or not.
+
+So we keep **counts** to know exactly *how many timestamps* are using each price.
+
+---
+
+## 🧠 What problem this solves
+
+Consider this correction:
+
+```
+update(1, 5)
+update(2, 5)
+update(3, 10)
+update(2, 8)   // correction: timestamp 2 changes 5 → 8
+```
+
+Without counts:
+
+* We might remove price 5 from our set when timestamp 2 changes —
+  but timestamp 1 still has price 5!
+  That would make our minimum or maximum wrong.
+
+With counts:
+
+```
+priceCount before correction: {5=2, 10=1}
+After correction:
+    Decrement count of 5 → now 1
+    Increment count of 8 → now {5=1, 8=1, 10=1}
+```
+
+✅ Everything is still correct.
+
+---
+
+## ⚙️ How we use the counts
+
+In the `update()` method:
+
+```java
+int old = timeToPrice.get(timestamp);
+int c = priceCount.get(old) - 1;
+if (c == 0)
+    priceCount.remove(old);  // remove price only when no timestamps have it
+else
+    priceCount.put(old, c);
+```
+
+This ensures:
+
+* Prices are only removed when their count drops to 0.
+* `priceCount` always reflects *current* active prices.
+
+---
+
+## 🧮 Why `TreeMap` is perfect here
+
+* **Keeps prices sorted (ascending):**
+
+  * `firstKey()` → smallest price → `minimum()`
+  * `lastKey()` → largest price → `maximum()`
+* **Stores counts:** supports duplicates naturally
+* **Efficient updates:** insert/remove are `O(log n)`
+
+---
+
+## ✅ Summary
+
+| Concept                              | Purpose                                                  |
+| ------------------------------------ | -------------------------------------------------------- |
+| Same price can appear multiple times | Need to track how many timestamps use it                 |
+| When one timestamp changes           | We must know if it’s the **last** one using that price   |
+| `priceCount` value (the count)       | Prevents premature deletion of a price                   |
+| `TreeMap`                            | Keeps prices sorted for quick `min`/`max`                |
+| Together                             | Guarantees correctness and efficiency for all operations |
+
+---
+
+**In short:**
+We maintain *timestamp counts per price* so we know **when a price truly disappears** from the system.
+Without these counts, a correction could make us remove a price too early — breaking `minimum()` and `maximum()`.
+
+
 */
 
 
