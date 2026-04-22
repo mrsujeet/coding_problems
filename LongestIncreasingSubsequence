@@ -1,0 +1,84 @@
+/*
+https://leetcode.com/problems/longest-increasing-subsequence/description/?envType=problem-list-v2&envId=oizxjoit
+
+Given an integer array nums, return the length of the longest strictly increasing subsequence.
+
+ Example 1:
+
+Input: nums = [10,9,2,5,3,7,101,18]
+Output: 4
+Explanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4.
+Example 2:
+
+Input: nums = [0,1,0,3,2,3]
+Output: 4
+Example 3:
+
+Input: nums = [7,7,7,7,7,7,7]
+Output: 1
+ 
+
+Constraints:
+
+1 <= nums.length <= 2500
+-104 <= nums[i] <= 104
+ 
+
+Follow up: Can you come up with an algorithm that runs in O(n log(n)) time complexity?
+
+
+Brief example
+
+For:
+
+nums = [10, 9, 2, 5, 3, 7, 101, 18]
+
+lis changes like this:
+
+10   -> [10]
+9    -> [9]
+2    -> [2]
+5    -> [2, 5]
+3    -> [2, 3]
+7    -> [2, 3, 7]
+101  -> [2, 3, 7, 101]
+18   -> [2, 3, 7, 18]
+
+Final size = 4, so answer is:
+
+4
+
+Important: lis is not always the actual subsequence.
+It stores the best possible tail values for each length, which is enough to compute the correct LIS length.
+
+*/
+
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        int[] tails = new int[nums.length]; // tails[i] = smallest tail of LIS of length i+1
+        int size = 0; // current length of longest increasing subsequence found
+
+        for (int num : nums) {
+            int left = 0, right = size;
+
+            // find first position where tails[pos] >= num
+            while (left < right) {
+                int mid = left + (right - left) / 2;
+
+                if (tails[mid] >= num) {
+                    right = mid;
+                } else {
+                    left = mid + 1;
+                }
+            }
+
+            tails[left] = num; // replace tail or append new tail
+
+            if (left == size) {
+                size++; // extended LIS length
+            }
+        }
+
+        return size;
+    }
+}
