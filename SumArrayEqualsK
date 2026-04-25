@@ -60,6 +60,52 @@ map → stores cumulative sums encountered and their frequency
 (sum - k) → checks for previous cumulative sum that would form subarray
 
 count → number of valid subarrays found
+/*
+     * Because nums[i] can be negative, sliding window is not reliable here.
+     *
+     * Best approach:
+     * Prefix Sum + HashMap
+     *
+     * Idea:
+     * If current prefixSum is X, then we need to know whether
+     * there was a previous prefix sum equal to:
+     *
+     *      X - k
+     *
+     * Because:
+     *
+     *      currentPrefixSum - previousPrefixSum = k
+     *
+     * So:
+     *
+     *      previousPrefixSum = currentPrefixSum - k
+     */
+
+     /*
+         * If needed exists in the map, then all previous positions
+         * with this prefix sum can form valid subarrays ending at current index.
+         *
+         * Why add freq.get(needed), not just count++?
+         *
+         * Because freq.get(needed) may be more than 1.
+         * The same prefix sum can appear multiple times due to:
+         *
+         * 1. Negative numbers
+         * 2. Zero values
+         * 3. Positive and negative numbers canceling each other
+         *
+         * Example:
+         *
+         * nums = [1, -1, 1, -1, 1], k = 1
+         *
+         * Prefix sums:
+         *
+         * 0, 1, 0, 1, 0, 1
+         *
+         * Prefix sum 0 appears multiple times.
+         * So when needed = 0, there may be multiple valid subarrays.
+         */
+
 */
 
 public int subarraySum(int[] nums, int k) {
