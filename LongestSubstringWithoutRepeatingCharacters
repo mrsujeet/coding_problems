@@ -58,7 +58,7 @@ public int lengthOfLongestSubstring(String s) {
             char c=s.charAt(end);
 
             if(map.containsKey(c)){
-                start=Math.max(start,map.get(c)+1);
+                start=Math.max(start,map.get(c)+1);// move left pointer just after the previous occurance
             }
             map.put(c,end);
             maxlen=Math.max(maxlen, end-start+1);
