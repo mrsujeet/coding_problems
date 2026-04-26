@@ -29,6 +29,12 @@ Therefore the root is the k-th largest.
 Common tweaks
 k-th smallest instead?
 Use a max-heap (new PriorityQueue<>(Collections.reverseOrder())) and adjust the logic similarly.
+
+omplexity
+Time:  O(n log k)
+Space: O(k)
+
+Because each insert/remove from heap costs log k, and we do it for n elements.
 */
 
 public int findKthLargest(int[] nums, int k) {
