@@ -1,0 +1,101 @@
+/*
+https://leetcode.com/problems/last-stone-weight/description/
+
+You are given an array of integers stones where stones[i] is the weight of the ith stone.
+
+We are playing a game with the stones. On each turn, we choose the heaviest two stones and smash them together. Suppose the heaviest two stones have weights x and y with x <= y. The result of this smash is:
+
+If x == y, both stones are destroyed, and
+If x != y, the stone of weight x is destroyed, and the stone of weight y has new weight y - x.
+At the end of the game, there is at most one stone left.
+
+Return the weight of the last remaining stone. If there are no stones left, return 0.
+
+ 
+
+Example 1:
+
+Input: stones = [2,7,4,1,8,1]
+Output: 1
+Explanation: 
+We combine 7 and 8 to get 1 so the array converts to [2,4,1,1,1] then,
+we combine 2 and 4 to get 2 so the array converts to [2,1,1,1] then,
+we combine 2 and 1 to get 1 so the array converts to [1,1,1] then,
+we combine 1 and 1 to get 0 so the array converts to [1] then that's the value of the last stone.
+Example 2:
+
+Input: stones = [1]
+Output: 1
+ 
+
+Constraints:
+
+1 <= stones.length <= 30
+1 <= stones[i] <= 1000
+
+*/
+
+
+/*
+Since each turn requires choosing the two heaviest stones, 
+I need a data structure that can efficiently give me the maximum value. 
+A max heap is a good fit. I insert all stones into the heap, 
+then while at least two stones remain, I remove the top two.
+If they are different, I insert their difference back. 
+At the end, if the heap is empty I return 0, otherwise I return the remaining stone. 
+The time complexity is O(n log n) and space complexity is O(n).
+
+Time Complexity
+
+Let n be the number of stones.
+
+Building heap:
+
+O(n log n)
+
+Each smash removes two stones and may insert one back:
+
+O(log n)
+
+Total:
+
+O(n log n)
+Space Complexity
+
+We store all stones in the heap:
+
+O(n)
+*/
+
+
+import java.util.*;
+
+class Solution {
+    public int lastStoneWeight(int[] stones) {
+        // Max heap: largest stone comes first
+        PriorityQueue<Integer> maxHeap = new PriorityQueue<>((a, b) -> b - a);
+
+        // Add all stones into max heap
+        for (int stone : stones) {
+            maxHeap.offer(stone);
+        }
+
+        // Continue until at most one stone is left
+        while (maxHeap.size() > 1) {
+            // y is the heaviest stone
+            int y = maxHeap.poll();
+
+            // x is the second heaviest stone
+            int x = maxHeap.poll();
+
+            // If weights are different, put the remaining stone back
+            if (y != x) {
+                maxHeap.offer(y - x);
+            }
+        }
+
+        // If heap is empty, no stone left
+        // Otherwise return the last stone weight
+        return maxHeap.isEmpty() ? 0 : maxHeap.poll();
+    }
+}
