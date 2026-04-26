@@ -61,3 +61,18 @@ grid[i][j] is '0' or '1'.
 
 
     }
+
+
+/*
+Main loop visits each cell once
+DFS visits each land cell once, as it marks it zero water after visit 
+
+Together:
+
+O(m * n) + O(m * n) = O(m * n)
+
+Space complexity:
+
+O(m * n)
+
+*/
