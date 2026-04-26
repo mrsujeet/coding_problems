@@ -53,6 +53,15 @@ It stores the best possible tail values for each length, which is enough to comp
 
 */
 
+/*
+I use a tails array. tails[i] stores the smallest possible tail value of an increasing subsequence of length i + 1.
+For every number, I binary search the first position in tails where the value is greater than or equal to the current number.
+If I find such a position, I replace it because a smaller tail gives better chances to extend later. 
+If the number is greater than all current tails, I append it and increase the LIS length. 
+At the end, the size of the tails array is the length of the longest increasing subsequence. 
+The time complexity is O(n log n) and space complexity is O(n).
+*/
+
 class Solution {
     public int lengthOfLIS(int[] nums) {
         int[] tails = new int[nums.length]; // tails[i] = smallest tail of LIS of length i+1
