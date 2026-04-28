@@ -1,0 +1,150 @@
+/*
+
+https://leetcode.com/problems/palindrome-linked-list/description/?envType=company&envId=nvidia&favoriteSlug=nvidia-three-months
+
+Given the head of a singly linked list, return true if it is a palindrome or false otherwise.
+
+ 
+
+Example 1:
+
+
+Input: head = [1,2,2,1]
+Output: true
+Example 2:
+
+
+Input: head = [1,2]
+Output: false
+ 
+
+Constraints:
+
+The number of nodes in the list is in the range [1, 105].
+0 <= Node.val <= 9
+ 
+
+Follow up: Could you do it in O(n) time and O(1) space?
+
+*/
+
+/*
+solve this problem in three steps. First, I use slow and fast pointers to find the last node of the first half of the linked list.
+Then I reverse the second half in-place. After that, I compare the first half and the reversed second half node by node. 
+If all values match, the linked list is a palindrome; otherwise, it is not.
+*/
+
+/*
+Complexity
+Time Complexity: O(n)
+
+We find the middle, reverse half of the list, and compare both halves.
+
+Space Complexity: O(1)
+*/
+
+class Solution {
+    public boolean isPalindrome(ListNode head) {
+        // If list is empty or has only one node, it is always palindrome
+        if (head == null || head.next == null) {
+            return true;
+        }
+
+        /*
+         Step 1:
+         Find the last node of the first half.
+
+         Example:
+         1 -> 2 -> 2 -> 1
+
+         firstHalfLastNode will point to first 2:
+
+         1 -> 2 -> 2 -> 1
+              ^
+        */
+        ListNode firstHalfLastNode = getFirstHalfLastNode(head);
+
+        /*
+         Step 2:
+         Reverse the second half.
+
+         Original second half:
+         2 -> 1
+
+         After reverse:
+         1 -> 2
+        */
+        ListNode secondHalfHead = reverse(firstHalfLastNode.next);
+
+        /*
+         Step 3:
+         Compare first half and reversed second half.
+
+         First half:        1 -> 2
+         Reversed second:   1 -> 2
+        */
+        ListNode firstPointer = head;
+        ListNode secondPointer = secondHalfHead;
+
+        while (secondPointer != null) {
+            if (firstPointer.val != secondPointer.val) {
+                return false;
+            }
+
+            firstPointer = firstPointer.next;
+            secondPointer = secondPointer.next;
+        }
+
+        return true;
+    }
+
+    private ListNode getFirstHalfLastNode(ListNode head) {
+        ListNode slow = head;
+        ListNode fast = head;
+
+        /*
+         Move slow by 1 step and fast by 2 steps.
+
+         This condition stops slow at the last node of first half.
+
+         For even list:
+         1 -> 2 -> 2 -> 1
+              ^
+              slow stops here
+
+         For odd list:
+         1 -> 2 -> 3 -> 2 -> 1
+                   ^
+                   slow stops at middle
+        */
+        while (fast.next != null && fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        return slow;
+    }
+
+    private ListNode reverse(ListNode head) {
+        ListNode prev = null;
+        ListNode curr = head;
+
+        /*
+         Standard linked list reversal.
+
+         Example:
+         2 -> 1
+
+         After reverse:
+         1 -> 2
+        */
+        while (curr != null) {
+            ListNode nextNode = curr.next; // Save next node
+            curr.next = prev;              // Reverse current pointer
+            prev = curr;                   // Move prev forward
+            curr = nextNode;               // Move curr forward
+        }
+
+        return prev; // New head of reversed list
+    }
+}
