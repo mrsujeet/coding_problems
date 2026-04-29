@@ -41,6 +41,10 @@ Follow up: If the maximum number of allowed calls to the API knows is 3 * n, cou
 */
 
 /*
+Greedy Elimination Pattern
+
+We eliminate one impossible candidate in every comparison.
+
 first assume person 0 is the celebrity candidate. Then I compare the candidate with every other person. 
 If the candidate knows another person, then the candidate cannot be celebrity, so I replace the candidate. 
 Otherwise, the other person cannot be celebrity because the candidate does not know them. After this pass, 
