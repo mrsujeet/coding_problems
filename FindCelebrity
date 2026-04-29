@@ -1,0 +1,113 @@
+/*
+https://leetcode.com/problems/find-the-celebrity/description/?envType=company&envId=nvidia&favoriteSlug=nvidia-six-months
+
+Suppose you are at a party with n people labeled from 0 to n - 1 and among them, there may exist one celebrity. The definition of a celebrity is that all the other n - 1 people know the celebrity, but the celebrity does not know any of them.
+
+Now you want to find out who the celebrity is or verify that there is not one. You are only allowed to ask questions like: "Hi, A. Do you know B?" to get information about whether A knows B. You need to find out the celebrity (or verify there is not one) by asking as few questions as possible (in the asymptotic sense).
+
+You are given an integer n and a helper function bool knows(a, b) that tells you whether a knows b. Implement a function int findCelebrity(n). There will be exactly one celebrity if they are at the party.
+
+Return the celebrity's label if there is a celebrity at the party. If there is no celebrity, return -1.
+
+Note that the n x n 2D array graph given as input is not directly available to you, and instead only accessible through the helper function knows. graph[i][j] == 1 represents person i knows person j, wherease graph[i][j] == 0 represents person j does not know person i.
+
+ 
+
+Example 1:
+
+
+Input: graph = [[1,1,0],[0,1,0],[1,1,1]]
+Output: 1
+Explanation: There are three persons labeled with 0, 1 and 2. graph[i][j] = 1 means person i knows person j, otherwise graph[i][j] = 0 means person i does not know person j. The celebrity is the person labeled as 1 because both 0 and 2 know him but 1 does not know anybody.
+Example 2:
+
+
+Input: graph = [[1,0,1],[1,1,0],[0,1,1]]
+Output: -1
+Explanation: There is no celebrity.
+ 
+
+Constraints:
+
+n == graph.length == graph[i].length
+2 <= n <= 100
+graph[i][j] is 0 or 1.
+graph[i][i] == 1
+ 
+
+Follow up: If the maximum number of allowed calls to the API knows is 3 * n, could you find a solution without exceeding the maximum number of calls?
+
+
+*/
+
+/*
+first assume person 0 is the celebrity candidate. Then I compare the candidate with every other person. 
+If the candidate knows another person, then the candidate cannot be celebrity, so I replace the candidate. 
+Otherwise, the other person cannot be celebrity because the candidate does not know them. After this pass, 
+only one possible candidate remains. Then I verify that this candidate knows nobody and everybody else knows this candidate.
+*/
+
+
+
+public class Solution extends Relation {
+
+    public int findCelebrity(int n) {
+
+        int candidate = 0; // Assume person 0 is the celebrity candidate
+
+        /*
+         Step 1: Find one possible celebrity.
+
+         If candidate knows people:
+             candidate cannot be celebrity,
+             because celebrity should not know anyone.
+             So people becomes the new candidate.
+
+         If candidate does not know people:
+             people cannot be celebrity,
+             because everyone should know the celebrity,
+             but candidate does not know people.
+        */
+        for (int people = 1; people < n; people++) {
+            if (knows(candidate, people)) {
+                candidate = people;
+            }
+        }
+
+        /*
+         Step 2: Verify the final candidate.
+
+         The first loop only gives a possible candidate.
+         It does not guarantee that the candidate is celebrity.
+        */
+        if (isCelebrity(candidate, n)) {
+            return candidate;
+        }
+
+        return -1;
+    }
+
+    private boolean isCelebrity(int potentialCelebrity, int numPeople) {
+
+        for (int people = 0; people < numPeople; people++) {
+
+            if (people == potentialCelebrity) {
+                continue;
+            }
+
+            /*
+             Celebrity condition:
+             1. Celebrity should not know anyone.
+             2. Everyone should know celebrity.
+
+             If either condition fails, return false.
+            */
+            if (knows(potentialCelebrity, people) ||
+                !knows(people, potentialCelebrity)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
