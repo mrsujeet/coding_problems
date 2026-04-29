@@ -1,0 +1,105 @@
+/*
+https://leetcode.com/problems/rotting-oranges/description/?envType=company&envId=nvidia&favoriteSlug=nvidia-six-months
+
+You are given an m x n grid where each cell can have one of three values:
+
+0 representing an empty cell,
+1 representing a fresh orange, or
+2 representing a rotten orange.
+Every minute, any fresh orange that is 4-directionally adjacent to a rotten orange becomes rotten.
+
+Return the minimum number of minutes that must elapse until no cell has a fresh orange. If this is impossible, return -1.
+
+ 
+
+Example 1:
+
+
+Input: grid = [[2,1,1],[1,1,0],[0,1,1]]
+Output: 4
+Example 2:
+
+Input: grid = [[2,1,1],[0,1,1],[1,0,1]]
+Output: -1
+Explanation: The orange in the bottom left corner (row 2, column 0) is never rotten, because rotting only happens 4-directionally.
+Example 3:
+
+Input: grid = [[0,2]]
+Output: 0
+Explanation: Since there are already no fresh oranges at minute 0, the answer is just 0.
+ 
+
+Constraints:
+
+m == grid.length
+n == grid[i].length
+1 <= m, n <= 10
+grid[i][j] is 0, 1, or 2.
+*/
+
+/*
+se multi-source BFS because all rotten oranges spread simultaneously. 
+I first add all rotten oranges to the queue and count fresh oranges. 
+Then I process the queue level by level, where each level represents one minute.
+Whenever I find a fresh orange in four directions, 
+I mark it rotten, reduce the fresh count, and add it to the queue.
+At the end, if fresh is zero, I return minutes; otherwise, some oranges were unreachable, so I return -1.
+*/
+
+
+
+public int orangesRotting(int[][] grid) {
+    int row = grid.length;
+    int col = grid[0].length;
+
+    Queue<int[]> queue = new LinkedList<>();
+    int fresh = 0;
+
+    // Add all initially rotten oranges to queue
+    // Count all fresh oranges
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < col; j++) {
+            if (grid[i][j] == 2) {
+                queue.offer(new int[]{i, j});
+            } else if (grid[i][j] == 1) {
+                fresh++;
+            }
+        }
+    }
+
+    int[][] dirs = {
+        {-1, 0}, // up
+        {1, 0},  // down
+        {0, -1}, // left
+        {0, 1}   // right
+    };
+
+    int minutesSpent = 0;
+
+    // BFS level by level
+    while (!queue.isEmpty() && fresh > 0) {
+        int size = queue.size();
+
+        for (int i = 0; i < size; i++) {
+            int[] current = queue.poll();
+
+            for (int[] dir : dirs) {
+                int newR = current[0] + dir[0];
+                int newC = current[1] + dir[1];
+
+                if (newR >= 0 && newR < row &&
+                    newC >= 0 && newC < col &&
+                    grid[newR][newC] == 1) {
+
+                    grid[newR][newC] = 2;
+                    queue.offer(new int[]{newR, newC});
+                    fresh--;
+                }
+            }
+        }
+
+        minutesSpent++;
+    }
+
+    return fresh == 0 ? minutesSpent : -1;
+}
