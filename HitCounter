@@ -1,0 +1,121 @@
+/*
+https://leetcode.com/problems/design-hit-counter/description/
+Design a hit counter which counts the number of hits received in the past 5 minutes (i.e., the past 300 seconds).
+
+Your system should accept a timestamp parameter (in seconds granularity), and you may assume that calls are being made to the system in chronological order (i.e., timestamp is monotonically increasing). Several hits may arrive roughly at the same time.
+
+Implement the HitCounter class:
+
+HitCounter() Initializes the object of the hit counter system.
+void hit(int timestamp) Records a hit that happened at timestamp (in seconds). Several hits may happen at the same timestamp.
+int getHits(int timestamp) Returns the number of hits in the past 5 minutes from timestamp (i.e., the past 300 seconds).
+ 
+
+Example 1:
+
+Input
+["HitCounter", "hit", "hit", "hit", "getHits", "hit", "getHits", "getHits"]
+[[], [1], [2], [3], [4], [300], [300], [301]]
+Output
+[null, null, null, null, 3, null, 4, 3]
+
+Explanation
+HitCounter hitCounter = new HitCounter();
+hitCounter.hit(1);       // hit at timestamp 1.
+hitCounter.hit(2);       // hit at timestamp 2.
+hitCounter.hit(3);       // hit at timestamp 3.
+hitCounter.getHits(4);   // get hits at timestamp 4, return 3.
+hitCounter.hit(300);     // hit at timestamp 300.
+hitCounter.getHits(300); // get hits at timestamp 300, return 4.
+hitCounter.getHits(301); // get hits at timestamp 301, return 3.
+ 
+
+Constraints:
+
+1 <= timestamp <= 2 * 109
+All the calls are being made to the system in chronological order (i.e., timestamp is monotonically increasing).
+At most 300 calls will be made to hit and getHits.
+ 
+
+Follow up: What if the number of hits per second could be huge? Does your design scale?
+
+
+*/
+
+/*
+I will use a fixed-size sliding window of 300 seconds. Since timestamps are in seconds,
+I can keep 300 buckets. Each bucket stores the actual timestamp and the number of hits at that timestamp.
+For hit, I calculate index = timestamp % 300. If the bucket already belongs to the same timestamp,
+I increment the count. Otherwise, I reset that bucket because it contains old data.
+For getHits, I scan all 300 buckets and count only those where timestamp - times[i] < 300.
+This works well for huge hits per second because I store one count per second instead of storing every hit individually.
+*/
+
+class HitCounter {
+
+    // We only care about the last 300 seconds.
+    private static final int WINDOW_SIZE = 300;
+
+    // times[i] stores the actual timestamp for bucket i.
+    // This is needed because the same bucket is reused every 300 seconds.
+    private int[] times;
+
+    // counts[i] stores how many hits happened at times[i].
+    private int[] counts;
+
+    public HitCounter() {
+        times = new int[WINDOW_SIZE];
+        counts = new int[WINDOW_SIZE];
+    }
+
+    public void hit(int timestamp) {
+        // Map the timestamp to one of the 300 buckets.
+        // Example:
+        // timestamp 1   -> index 1
+        // timestamp 301 -> index 1
+        // timestamp 601 -> index 1
+        int index = timestamp % WINDOW_SIZE;
+
+        // Case 1:
+        // If this bucket already represents the same timestamp,
+        // just increase the hit count for that second.
+        if (times[index] == timestamp) {
+            counts[index]++;
+        } 
+        
+        // Case 2:
+        // If this bucket contains an old timestamp,
+        // reset it for the current timestamp.
+        else {
+            times[index] = timestamp;
+            counts[index] = 1;
+        }
+    }
+
+    public int getHits(int timestamp) {
+        int totalHits = 0;
+
+        // Check all 300 buckets.
+        for (int i = 0; i < WINDOW_SIZE; i++) {
+
+            // A hit is valid only if it happened within the last 300 seconds.
+            //
+            // Example:
+            // getHits(301)
+            //
+            // timestamp 1:
+            // 301 - 1 = 300 -> expired
+            //
+            // timestamp 2:
+            // 301 - 2 = 299 -> valid
+            //
+            // So condition should be:
+            // timestamp - times[i] < 300
+            if (timestamp - times[i] < WINDOW_SIZE) {
+                totalHits += counts[i];
+            }
+        }
+
+        return totalHits;
+    }
+}
