@@ -7,6 +7,99 @@ which controls burst size, and a refill rate, which controls sustained traffic.
 Every request consumes one token. If a token is available, the request is allowed; otherwise, it is rejected.
 */
 
+// trimed vesion
+import java.util.concurrent.ConcurrentHashMap;
+
+public class RateLimiter {
+
+    private int capacity;
+    private double refillRatePerSecond;
+    private ConcurrentHashMap<String, TokenBucket> buckets;
+
+    public RateLimiter(int capacity, double refillRatePerSecond) {
+        this.capacity = capacity;
+        this.refillRatePerSecond = refillRatePerSecond;
+        this.buckets = new ConcurrentHashMap<>();
+    }
+
+    public boolean allowRequest(String clientId) {
+        if (clientId == null) {
+            throw new IllegalArgumentException("client does not exist");
+        }
+
+        TokenBucket bucket = buckets.computeIfAbsent(
+                clientId,
+                id -> new TokenBucket(capacity)
+        );
+
+        return bucket.tryConsume();
+    }
+
+    private class TokenBucket {
+
+        private double token;
+        private long lastRefillTimeNano;
+
+        public TokenBucket(int token) {
+            this.token = token;
+            this.lastRefillTimeNano = System.nanoTime();
+        }
+
+        public synchronized boolean tryConsume() {
+            refill();
+
+            if (token >= 1.0) {
+                token -= 1.0;
+                return true;
+            }
+
+            return false;
+        }
+
+        private void refill() {
+            long currentTimeNanos = System.nanoTime();
+
+            double tokenToAdd =
+                    ((currentTimeNanos - lastRefillTimeNano) / 1_000_000_000.0)
+                            * refillRatePerSecond;
+
+            token = Math.min(capacity, token + tokenToAdd);
+
+            lastRefillTimeNano = currentTimeNanos;
+        }
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        /*
+         * capacity = 5
+         * refillRatePerSecond = 1
+         *
+         * Meaning:
+         * - User can send 5 requests immediately.
+         * - After that, 1 token is added every second.
+         */
+        RateLimiter limiter = new RateLimiter(5, 1.0);
+
+        String clientId = "user-123";
+
+        for (int i = 1; i <= 10; i++) {
+            boolean allowed = limiter.allowRequest(clientId);
+            System.out.println("Request " + i + " allowed? " + allowed);
+        }
+
+        Thread.sleep(2000);
+
+        System.out.println("After waiting 2 seconds:");
+
+        for (int i = 11; i <= 14; i++) {
+            boolean allowed = limiter.allowRequest(clientId);
+            System.out.println("Request " + i + " allowed? " + allowed);
+        }
+    }
+}
+
+
+/*** detailed explanation ****/
 import java.util.concurrent.ConcurrentHashMap;
 
 public class RateLimiter {
