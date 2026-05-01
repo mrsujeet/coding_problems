@@ -1,0 +1,175 @@
+/*
+Implement a API Rate Limiter
+*/
+/*
+I used the Token Bucket algorithm. Each client gets one bucket. The bucket has a maximum capacity,
+which controls burst size, and a refill rate, which controls sustained traffic. 
+Every request consumes one token. If a token is available, the request is allowed; otherwise, it is rejected.
+*/
+
+import java.util.concurrent.ConcurrentHashMap;
+
+public class RateLimiter {
+
+    // Maximum number of tokens in the bucket.
+    // Also represents maximum burst size.
+    // Example: capacity = 5 means user can send 5 requests immediately.
+    private final int capacity;
+
+    // Number of tokens added back per second.
+    // Example: refillRatePerSecond = 1 means 1 request is allowed per second after burst is used.
+    private final double refillRatePerSecond;
+
+    // One token bucket per client/user/IP.
+    // ConcurrentHashMap makes access to the map thread-safe.
+    private final ConcurrentHashMap<String, TokenBucket> buckets;
+
+    public RateLimiter(int capacity, double refillRatePerSecond) {
+        if (capacity <= 0) {
+            throw new IllegalArgumentException("Capacity must be greater than 0");
+        }
+
+        if (refillRatePerSecond <= 0) {
+            throw new IllegalArgumentException("Refill rate must be greater than 0");
+        }
+
+        this.capacity = capacity;
+        this.refillRatePerSecond = refillRatePerSecond;
+        this.buckets = new ConcurrentHashMap<>();
+    }
+
+    /**
+     * This method checks whether a request from the given client should be allowed.
+     *
+     * Returns true  -> request allowed
+     * Returns false -> request rejected / rate limited
+     */
+    public boolean allowRequest(String clientId) {
+        if (clientId == null || clientId.isEmpty()) {
+            throw new IllegalArgumentException("Client id cannot be null or empty");
+        }
+
+        /*
+         * computeIfAbsent is important here.
+         *
+         * It atomically does:
+         * 1. Check if bucket exists for this client
+         * 2. If not, create a new bucket
+         * 3. Store it in the map
+         * 4. Return the bucket
+         *
+         * This avoids race condition where two threads create two buckets
+         * for the same client.
+         */
+        TokenBucket bucket = buckets.computeIfAbsent(
+                clientId,
+                id -> new TokenBucket()
+        );
+
+        // Try to consume one token for this request.
+        return bucket.tryConsume();
+    }
+
+    /**
+     * TokenBucket stores mutable state for one client.
+     *
+     * Each client has:
+     * - current number of tokens
+     * - last refill timestamp
+     */
+    private class TokenBucket {
+
+        // Current available tokens.
+        // double allows partial refill like 0.5 token.
+        private double tokens;
+
+        // Last time tokens were refilled.
+        private long lastRefillTimeNanos;
+
+        public TokenBucket() {
+            // Start bucket as full, so initial burst is allowed.
+            this.tokens = capacity;
+
+            // Use nanoTime for measuring elapsed time.
+            // nanoTime is better than currentTimeMillis for duration calculation.
+            this.lastRefillTimeNanos = System.nanoTime();
+        }
+
+        /**
+         * synchronized is important because multiple threads can send requests
+         * for the same client at the same time.
+         *
+         * It protects:
+         * - tokens
+         * - lastRefillTimeNanos
+         */
+        public synchronized boolean tryConsume() {
+            // First refill tokens based on elapsed time.
+            refill();
+
+            // If at least one token is available, allow request.
+            if (tokens >= 1.0) {
+                tokens -= 1.0;
+                return true;
+            }
+
+            // No token available, reject request.
+            return false;
+        }
+
+        /**
+         * Add tokens based on how much time has passed since last refill.
+         */
+        private void refill() {
+            long now = System.nanoTime();
+
+            long elapsedNanos = now - lastRefillTimeNanos;
+
+            if (elapsedNanos <= 0) {
+                return;
+            }
+
+            // Convert nanoseconds to seconds.
+            double elapsedSeconds = elapsedNanos / 1_000_000_000.0;
+
+            // Calculate how many tokens should be added.
+            double tokensToAdd = elapsedSeconds * refillRatePerSecond;
+
+            // Add tokens, but never exceed bucket capacity.
+            tokens = Math.min(capacity, tokens + tokensToAdd);
+
+            // Update refill time.
+            lastRefillTimeNanos = now;
+        }
+    }
+
+    // Simple test
+    public static void main(String[] args) throws InterruptedException {
+
+        /*
+         * capacity = 5
+         * refillRatePerSecond = 1
+         *
+         * Meaning:
+         * - User can send 5 requests immediately.
+         * - After that, 1 token is added every second.
+         */
+        RateLimiter limiter = new RateLimiter(5, 1.0);
+
+        String clientId = "user-123";
+
+        for (int i = 1; i <= 10; i++) {
+            boolean allowed = limiter.allowRequest(clientId);
+            System.out.println("Request " + i + " allowed? " + allowed);
+        }
+
+        Thread.sleep(2000);
+
+        System.out.println("After waiting 2 seconds:");
+
+        for (int i = 11; i <= 14; i++) {
+            boolean allowed = limiter.allowRequest(clientId);
+            System.out.println("Request " + i + " allowed? " + allowed);
+        }
+    }
+}
