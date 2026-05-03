@@ -34,12 +34,16 @@ Constraints:
 
 Analysis:
 
-    At each iteration, a new window is formed as per question. To achieve maxSlidingWindow efficiently, an additional data structure is required and appropriate condition should be imposed which can help in figuring out highest value element for the given window as window is moved from left to right.
+At each iteration, a new window is formed as per question. To achieve maxSlidingWindow efficiently,
+an additional data structure is required and appropriate condition should be imposed which can help in 
+figuring out highest value element for the given window as window is moved from left to right.
     To acheive this,the algorithm should ensure :
     1) The DS should remove element which is out of boundry
-    2) The DS should have way to figure out the highest number for the given window, i.e. decreasing list of array elements, so that first element, representing the highest value elemnt of the given window.
+    2) The DS should have way to figure out the highest number for the given window, i.e. 
+    decreasing list of array elements, so that first element, representing the highest value elemnt of the given window.
     
-    To satisfy the criterion mentioned above, A Deque implementation of LinkedList can be utilized. A Deque, known as double ended queue is special type of ds
+    To satisfy the criterion mentioned above, A Deque implementation of LinkedList can be utilized. 
+    A Deque, known as double ended queue is special type of ds
     It gives you the flexibility to do all of the following:
     
     Add to the front
@@ -62,7 +66,63 @@ i = 1, nums[1]=9: 9 is not greater than 10. deq is [0, 1]
 i = 2, nums[2]=8: 8 is not greater than 9. deq is [0, 1, 2]
 i = 3, nums[3]=7: 7 is not greater than 8. deq is [0, 1, 2, 3]. The Deque now has size 4, which is k.
     */
+/*
+I use a monotonic decreasing deque. The deque stores indexes, not values, 
+because indexes help us remove elements that are outside the current window. 
+For every new element, I first remove expired indexes from the front. 
+Then I remove smaller elements from the back because the 
+current bigger element makes them useless for future maximums. 
+The maximum of each window is always at the front of the deque. 
+Each element is inserted and removed at most once, so the time complexity is O(n). Space complexity is O(k).
+*/
+Method : 1
 
+
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        int n = nums.length;
+
+        // Number of sliding windows = n - k + 1
+        int[] result = new int[n - k + 1];
+
+        // Deque stores indexes, not values.
+        // Values at these indexes are maintained in decreasing order.
+        // Front of deque always points to the max element of current window.
+        Deque<Integer> deque = new ArrayDeque<>();
+
+        int resultIndex = 0;
+
+        for (int i = 0; i < n; i++) {
+
+            // Step 1: Remove indexes that are out of current window.
+            // Current window is from index (i - k + 1) to i.
+            // So any index <= i - k is expired.
+            while (!deque.isEmpty() && deque.peekFirst() <= i - k) {
+                deque.pollFirst();
+            }
+
+            // Step 2: Remove smaller values from the back.
+            // If nums[i] is greater at these indexes are maintained in decreasing order.
+        // Front than nums[deque.peekLast()],
+            // then the older smaller value can never be maximum again.
+            while (!deque.isEmpty() && nums[deque.peekLast()] < nums[i]) {
+                deque.pollLast();
+            }
+
+            // Step 3: Add current index.
+            deque.offerLast(i);
+
+            // Step 4: Once first window is complete,
+            // the front index of deque gives max value for current window.
+            if (i >= k - 1) {
+                result[resultIndex] = nums[deque.peekFirst()];
+                resultIndex++;
+            }
+        }
+
+        return result;
+    }
+
+Method : 2
     public int[] maxSlidingWindow(int[] nums, int k) {
         int n = nums.length;
         int [] result = new int[n-k+1];
