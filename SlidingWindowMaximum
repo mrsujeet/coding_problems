@@ -74,6 +74,11 @@ Then I remove smaller elements from the back because the
 current bigger element makes them useless for future maximums. 
 The maximum of each window is always at the front of the deque. 
 Each element is inserted and removed at most once, so the time complexity is O(n). Space complexity is O(k).
+
+Note: It is called a monotonic decreasing queue because the values represented by 
+the indexes inside the deque are always kept in decreasing order.
+
+Important: the deque stores indexes, but those indexes point to values in nums
 */
 Method : 1
 
