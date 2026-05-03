@@ -1,0 +1,88 @@
+/*
+https://leetcode.com/problems/merge-k-sorted-lists/description/?envType=company&envId=nvidia&favoriteSlug=nvidia-all
+
+You are given an array of k linked-lists lists, each linked-list is sorted in ascending order.
+
+Merge all the linked-lists into one sorted linked-list and return it.
+
+ 
+
+Example 1:
+
+Input: lists = [[1,4,5],[1,3,4],[2,6]]
+Output: [1,1,2,3,4,4,5,6]
+Explanation: The linked-lists are:
+[
+  1->4->5,
+  1->3->4,
+  2->6
+]
+merging them into one sorted linked list:
+1->1->2->3->4->4->5->6
+Example 2:
+
+Input: lists = []
+Output: []
+Example 3:
+
+Input: lists = [[]]
+Output: []
+ 
+
+Constraints:
+
+k == lists.length
+0 <= k <= 104
+0 <= lists[i].length <= 500
+-104 <= lists[i][j] <= 104
+lists[i] is sorted in ascending order.
+The sum of lists[i].length will not exceed 104.
+
+*/
+
+/*
+Since each linked list is already sorted, the minimum element among all remaining nodes must be present at the head of one of the lists.
+I use a min heap to keep track of the smallest current head among all lists.
+Initially, I add the head of every non-empty list to the heap. Then I repeatedly remove the smallest node, attach it to the result list, and if that node has a next node, I push the next node into the heap.
+This way, the heap never stores more than k nodes, and each node is processed exactly once.
+Time: O(N log k)
+Space: O(k)
+space complexity is O(k) because we are not creating a new result list.
+We are reusing the same existing ListNode objects.
+*/
+
+public static ListNode mergeKLists(ListNode[] lists) {
+    if (lists == null || lists.length == 0) {
+        return null;
+    }
+
+    PriorityQueue<ListNode> pq = new PriorityQueue<>(
+        (a, b) -> Integer.compare(a.val, b.val)
+    );
+
+    // Add the head of each non-empty list
+    for (ListNode node : lists) {
+        if (node != null) {
+            pq.offer(node);
+        }
+    }
+
+    ListNode dummyNode = new ListNode(-1);
+    ListNode current = dummyNode;
+
+    while (!pq.isEmpty()) {
+        // Get the smallest current node
+        ListNode node = pq.poll();
+
+        // Add the next node from the same list
+        if (node.next != null) {
+            pq.offer(node.next);
+        }
+
+        // Attach the smallest node to result
+        current.next = node;
+        current = current.next;
+    }
+
+    return dummyNode.next;
+}
