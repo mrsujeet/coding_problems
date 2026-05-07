@@ -1,0 +1,157 @@
+/*
+https://leetcode.com/problems/encode-and-decode-strings/description/
+
+Design an algorithm to encode a list of strings to a string. The encoded string is then sent over the network and is decoded back to the original list of strings.
+
+Machine 1 (sender) has the function:
+
+string encode(vector<string> strs) {
+  // ... your code
+  return encoded_string;
+}
+Machine 2 (receiver) has the function:
+vector<string> decode(string s) {
+  //... your code
+  return strs;
+}
+So Machine 1 does:
+
+string encoded_string = encode(strs);
+and Machine 2 does:
+
+vector<string> strs2 = decode(encoded_string);
+strs2 in Machine 2 should be the same as strs in Machine 1.
+
+Implement the encode and decode methods.
+
+You are not allowed to solve the problem using any serialize methods (such as eval).
+
+ 
+
+Example 1:
+
+Input: dummy_input = ["Hello","World"]
+Output: ["Hello","World"]
+Explanation:
+Machine 1:
+Codec encoder = new Codec();
+String msg = encoder.encode(strs);
+Machine 1 ---msg---> Machine 2
+
+Machine 2:
+Codec decoder = new Codec();
+String[] strs = decoder.decode(msg);
+Example 2:
+
+Input: dummy_input = [""]
+Output: [""]
+ 
+
+Constraints:
+
+1 <= strs.length <= 200
+0 <= strs[i].length <= 200
+strs[i] contains any possible characters out of 256 valid ASCII characters.
+
+*/
+
+/*
+Time Complexity: O(N)
+Space Complexity: O(N)
+
+*/
+
+import java.util.*;
+
+public class Codec {
+
+    /*
+     * Encodes a list of strings into one single string.
+     *
+     * Main idea:
+     * For every string, store:
+     *
+     *      length + "#" + actualString
+     *
+     * Example:
+     * ["Hello", "World"]
+     *
+     * "Hello" -> 5#Hello
+     * "World" -> 5#World
+     *
+     * Final encoded string:
+     * 5#Hello5#World
+     */
+    public String encode(List<String> strs) {
+        StringBuilder encoded = new StringBuilder();
+
+        for (String str : strs) {
+            // Add the length of the current string.
+            // This tells decoder how many characters to read.
+            encoded.append(str.length());
+
+            // Add a separator to mark where the length ends.
+            // This '#' is NOT used to split actual strings.
+            // It is only used to separate length from the string.
+            encoded.append('#');
+
+            // Add the actual string.
+            // It can contain any character, even '#'.
+            encoded.append(str);
+        }
+
+        return encoded.toString();
+    }
+
+    /*
+     * Decodes the encoded string back into the original list of strings.
+     *
+     * Example:
+     * Encoded string = 5#Hello5#World
+     *
+     * Step 1:
+     * Read length until '#': 5
+     * Read next 5 characters: Hello
+     *
+     * Step 2:
+     * Read length until '#': 5
+     * Read next 5 characters: World
+     */
+    public List<String> decode(String s) {
+        List<String> result = new ArrayList<>();
+
+        int index = 0;
+
+        while (index < s.length()) {
+
+            // Find the position of '#'.
+            // Everything before '#' represents the length.
+            int separatorIndex = index;
+
+            while (s.charAt(separatorIndex) != '#') {
+                separatorIndex++;
+            }
+
+            // Convert length from string to integer.
+            // Example: "5" -> 5
+            int length = Integer.parseInt(s.substring(index, separatorIndex));
+
+            // The actual string starts right after '#'.
+            int stringStartIndex = separatorIndex + 1;
+
+            // Read exactly 'length' characters.
+            // We do not search for another separator inside the actual string.
+            String currentString = s.substring(
+                stringStartIndex,
+                stringStartIndex + length
+            );
+
+            result.add(currentString);
+
+            // Move index to the start of the next encoded string.
+            index = stringStartIndex + length;
+        }
+
+        return result;
+    }
+}
