@@ -1,0 +1,106 @@
+/*
+https://leetcode.com/problems/spiral-matrix/description/
+
+iven an m x n matrix, return all elements of the matrix in spiral order.
+
+ 
+
+Example 1:
+
+
+Input: matrix = [[1,2,3],[4,5,6],[7,8,9]]
+Output: [1,2,3,6,9,8,7,4,5]
+Example 2:
+
+
+Input: matrix = [[1,2,3,4],[5,6,7,8],[9,10,11,12]]
+Output: [1,2,3,4,8,12,11,10,9,5,6,7]
+ 
+
+Constraints:
+
+m == matrix.length
+n == matrix[i].length
+1 <= m, n <= 10
+-100 <= matrix[i][j] <= 100
+
+*/
+
+
+
+
+
+
+
+/*
+At the start of the while loop, this is already safe:
+
+top row
+right column
+
+But after moving top++ and right--, the matrix may become invalid, so we check before:
+
+bottom row
+left column
+*/
+
+public List<Integer> spiralOrder(int[][] matrix) {
+
+    // Row boundaries
+    int top = 0;
+    int bottom = matrix.length - 1;
+
+    // Column boundaries
+    int left = 0;
+    int right = matrix[0].length - 1;
+
+    List<Integer> list = new ArrayList<>();
+
+    // Continue while there is a valid rectangle/layer remaining
+    while (left <= right && top <= bottom) {
+
+        // 1. Traverse the top row from left to right
+        // Example: [1, 2, 3]
+        for (int i = left; i <= right; i++) {
+            list.add(matrix[top][i]);
+        }
+
+        // Top row is completed, so move top boundary down
+        top++;
+
+        // 2. Traverse the right column from top to bottom
+        // Example: 6, 9
+        for (int i = top; i <= bottom; i++) {
+            list.add(matrix[i][right]);
+        }
+
+        // Right column is completed, so move right boundary left
+        right--;
+
+        // 3. Traverse the bottom row from right to left
+        // Check is needed because top may have crossed bottom
+        // Example: single row matrix should not be visited again
+        if (top <= bottom) {
+            for (int i = right; i >= left; i--) {
+                list.add(matrix[bottom][i]);
+            }
+
+            // Bottom row is completed, so move bottom boundary up
+            bottom--;
+        }
+
+        // 4. Traverse the left column from bottom to top
+        // Check is needed because left may have crossed right
+        // Example: single column matrix should not be visited again
+        if (left <= right) {
+            for (int i = bottom; i >= top; i--) {
+                list.add(matrix[i][left]);
+            }
+
+            // Left column is completed, so move left boundary right
+            left++;
+        }
+    }
+
+    return list;
+  }
