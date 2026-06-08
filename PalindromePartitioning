@@ -143,49 +143,133 @@ let me know to deepen your systematic interview prep efficiently.
 */
 
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class PalindromePartitioning {
-
-    public List<List<String>> partition(String s) {
+ public List<List<String>> partition(String s) {
+        // Final answer list
+        // For s = "aab", result will become:
+        // [["a", "a", "b"], ["aa", "b"]]
         List<List<String>> result = new ArrayList<>();
-        backtrack(s, 0, new ArrayList<>(), result);
+
+        // Current partition/path we are building
+        // Example: ["a"] or ["a", "a"] or ["aa", "b"]
+        List<String> path = new ArrayList<>();
+
+        // Start backtracking from index 0
+        backtrack(s, 0, path, result);
+
         return result;
     }
 
     private void backtrack(String s, int start, List<String> path, List<List<String>> result) {
+
+        // Base case:
+        // If start reaches the end of the string,
+        // it means we successfully partitioned the whole string.
+        //
+        // Example:
+        // s = "aab"
+        // path = ["a", "a", "b"]
+        // start = 3
+        // s.length() = 3
+        //
+        // So add this path to result.
         if (start == s.length()) {
             result.add(new ArrayList<>(path));
             return;
         }
-      /*
-            Java substring(start, end) extracts characters up to end - 1.
 
-            If you want to include the last character of the string in your substring, you need, end <= s.length():
-            String s = "aab";
-            len = 3
+        // Try every possible substring starting from index `start`
+        //
+        // Example:
+        // s = "aab"
+        //
+        // When start = 0:
+        // end = 0 -> s[0..0] = "a"
+        // end = 1 -> s[0..1] = "aa"
+        // end = 2 -> s[0..2] = "aab"
+        for (int end = start; end < s.length(); end++) {
 
-            In your current code:
+            // Check if current substring s[start..end] is palindrome
+            //
+            // Example:
+            // start = 0, end = 0 -> "a"   palindrome
+            // start = 0, end = 1 -> "aa"  palindrome
+            // start = 0, end = 2 -> "aab" not palindrome
+            if (isPalindrome(s, start, end)) {
 
-            For start = 0, end iterates over 1, 2 only.
+                // Get substring from start to end
+                // Note: substring(start, end + 1)
+                // because Java substring excludes the ending index.
+                //
+                // Example:
+                // s.substring(0, 1) = "a"
+                // s.substring(0, 2) = "aa"
+                String current = s.substring(start, end + 1);
 
-            You will never get substring(0, 3) = "aab", missing potential valid palindromic partitions.
-        */
-        for (int end = start + 1; end <= s.length(); end++) {
-            String substring = s.substring(start, end);
-            if (isPalindrome(substring)) {
-                path.add(substring);                  // choose
-                backtrack(s, end, path, result);     // explore
-                path.remove(path.size() - 1);        // unchoose (backtrack)
+                // Choose current palindrome substring
+                //
+                // Example:
+                // path = []
+                // choose "a"
+                // path = ["a"]
+                path.add(current);
+
+                // Explore the remaining string
+                //
+                // Important:
+                // next start = end + 1
+                //
+                // Example:
+                // If we chose s[0..0] = "a",
+                // then next start = 0 + 1 = 1
+                //
+                // If we chose s[0..1] = "aa",
+                // then next start = 1 + 1 = 2
+                backtrack(s, end + 1, path, result);
+
+                // Backtrack / undo choice
+                //
+                // Why?
+                // Because after exploring path with "a",
+                // we need to remove it and try another option like "aa".
+                //
+                // Example:
+                // path = ["a", "a", "b"]
+                // after saving it, remove "b"
+                // then remove "a"
+                // then try other choices
+                path.remove(path.size() - 1);
             }
         }
     }
+/*
+                         []
+                    start = 0
+                 /      |       \
+        end=0 "a"   end=1 "aa"   end=2 "aab"
+            ✅          ✅            ❌
+           /             \
+      ["a"]              ["aa"]
+    start = 1           start = 2
+      /    \                |
+end=1 "a" end=2 "ab"    end=2 "b"
+    ✅        ❌             ✅
+   /                         \
+["a","a"]                  ["aa","b"]
+start = 2                  start = 3
+   |
+end=2 "b"
+   ✅
+   |
+["a","a","b"]
+start = 3
 
-    private boolean isPalindrome(String s) {
-        int left = 0, right = s.length() - 1;
-        while (left < right) {
-            if (s.charAt(left) != s.charAt(right)) {
+*/
+
+
+    boolean isPalindrome(String s,int left, int right){
+        while(left<right){
+
+            if(s.charAt(left)!=s.charAt(right)){
                 return false;
             }
             left++;
@@ -194,11 +278,4 @@ public class PalindromePartitioning {
         return true;
     }
 
-    // For quick testing
-    public static void main(String[] args) {
-        PalindromePartitioning pp = new PalindromePartitioning();
-        String s = "aab";
-        List<List<String>> partitions = pp.partition(s);
-        System.out.println(partitions);
-    }
-}
+
