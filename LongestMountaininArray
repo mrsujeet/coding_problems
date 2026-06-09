@@ -1,0 +1,75 @@
+/*
+https://leetcode.com/problems/longest-mountain-in-array/description/?envType=company&envId=sofi&favoriteSlug=sofi-all
+
+You may recall that an array arr is a mountain array if and only if:
+
+arr.length >= 3
+There exists some index i (0-indexed) with 0 < i < arr.length - 1 such that:
+arr[0] < arr[1] < ... < arr[i - 1] < arr[i]
+arr[i] > arr[i + 1] > ... > arr[arr.length - 1]
+Given an integer array arr, return the length of the longest subarray, which is a mountain. Return 0 if there is no mountain subarray.
+
+ 
+
+Example 1:
+
+Input: arr = [2,1,4,7,3,2,5]
+Output: 5
+Explanation: The largest mountain is [1,4,7,3,2] which has length 5.
+Example 2:
+
+Input: arr = [2,2,2]
+Output: 0
+Explanation: There is no mountain.
+ 
+
+Constraints:
+
+1 <= arr.length <= 104
+0 <= arr[i] <= 104
+ 
+
+Follow up:
+
+Can you solve it using only one pass?
+Can you solve it in O(1) space?
+
+*/
+
+
+
+class Solution {
+    public int longestMountain(int[] arr) {
+        int n = arr.length;
+        int longest = 0;
+        int i = 1;
+        while (i < n) {
+            // count strictly increasing run ending at i
+            // up stays 0 if i starts on a flat or downhill pair (e.g. leading "2,1")
+            int up = 0;
+            while (i < n && arr[i - 1] < arr[i]) {
+                up++;
+                i++;
+            }
+            // count strictly decreasing run starting after the peak
+            // down stays 0 for a pure ascent like [1,2,3,4] (loop never enters)
+            int down = 0;
+            while (i < n && arr[i - 1] > arr[i]) {
+                down++;
+                i++;
+            }
+            // valid mountain needs BOTH sides:
+            //   up-only (no descent)  -> down == 0 -> skip  (e.g. [1,2,3,4] -> 0)
+            //   down-only (no climb)  -> up == 0   -> skip  (e.g. [4,3,2,1] -> 0, and leading junk descents)
+            if (up > 0 && down > 0) {
+                longest = Math.max(longest, up + down + 1);
+            }
+            // plateau / equal adjacent pair: neither loop advanced i, so step forward
+            // to avoid an infinite loop (e.g. [2,2,2] -> 0)
+            if (up == 0 && down == 0) {
+                i++;
+            }
+        }
+        return longest;
+    }
+}
