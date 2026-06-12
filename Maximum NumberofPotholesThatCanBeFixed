@@ -1,0 +1,100 @@
+/*
+https://leetcode.com/problems/maximum-number-of-potholes-that-can-be-fixed/description/
+
+You are given a string road, consisting only of characters "x" and ".", where each "x" denotes a pothole and each "." denotes a smooth road, and an integer budget.
+
+In one repair operation, you can repair n consecutive potholes for a price of n + 1.
+
+Return the maximum number of potholes that can be fixed such that the sum of the prices of all of the fixes doesn't go over the given budget.
+
+ 
+
+Example 1:
+
+Input: road = "..", budget = 5
+
+Output: 0
+
+Explanation:
+
+There are no potholes to be fixed.
+
+Example 2:
+
+Input: road = "..xxxxx", budget = 4
+
+Output: 3
+
+Explanation:
+
+We fix the first three potholes (they are consecutive). The budget needed for this task is 3 + 1 = 4.
+
+Example 3:
+
+Input: road = "x.x.xxx...x", budget = 14
+
+Output: 6
+
+Explanation:
+
+We can fix all the potholes. The total cost would be (1 + 1) + (1 + 1) + (3 + 1) + (1 + 1) = 10 which is within our budget of 14.
+
+ 
+
+Constraints:
+
+1 <= road.length <= 105
+1 <= budget <= 105 + 1
+road consists only of characters '.' and 'x'.
+*/
+
+
+import java.util.*;
+
+class Solution {
+    public int maxPotholes(String road, int budget) {
+        List<Integer> groups = new ArrayList<>();
+
+        int count = 0;
+
+        // Find lengths of consecutive 'x' groups
+        for (int i = 0; i < road.length(); i++) {
+            if (road.charAt(i) == 'x') {
+                count++;
+            } else {
+                if (count > 0) {
+                    groups.add(count);
+                    count = 0;
+                }
+            }
+        }
+
+        // Add last group if road ends with 'x'
+        if (count > 0) {
+            groups.add(count);
+        }
+
+        // Fix larger groups first
+        Collections.sort(groups, Collections.reverseOrder());
+
+        int fixed = 0;
+
+        for (int len : groups) {
+            int fullCost = len + 1;
+
+            if (budget >= fullCost) {
+                // Fix entire group
+                fixed += len;
+                budget -= fullCost;
+            } else {
+                // Fix partial group if possible
+                if (budget > 1) {
+                    fixed += budget - 1;
+                }
+                break;
+            }
+        }
+
+        return fixed;
+    }
+}
